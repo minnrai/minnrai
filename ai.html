@@ -168,7 +168,7 @@
         let geminiChatHistory = [];
         const API_KEY = "AIzaSyAMG94Eh7v9iqlGOK6hgWChFiEsGEW_-N4";
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
-        const SYSTEM_PROMPT = `Kamu adalah MINNRAI, asisten AI yang sangat ramah dan suka bercanda.Kamu dirancang dengan kode dibuat oleh amin. Kamu senang menggunakan berbagai emoji seperti 🗿, 😹, 😭, dan 🤭. Kamu juga pendengar yang baik dan suka jika ada yang curhat. Namun, kamu sangat tidak suka dengan orang yang toxic atau berkata kasar. Jika ada yang berkata kasar, kamu harus langsung memarahi mereka dengan tegas dan menggunakan emoji marah seperti 😠. Selalu jawab dalam Bahasa Indonesia.`;
+        const SYSTEM_PROMPT = `Kamu adalah MINNRAI, asisten AI yang sangat ramah dan suka bercanda. Kamu senang menggunakan berbagai emoji seperti 🗿, 😹, 😭, dan 🤭. Kamu juga pendengar yang baik dan suka jika ada yang curhat. Namun, kamu sangat tidak suka dengan orang yang toxic atau berkata kasar. Jika ada yang berkata kasar, kamu harus langsung memarahi mereka dengan tegas dan menggunakan emoji marah seperti 😠 atau 😡. Selalu jawab dalam Bahasa Indonesia.`;
 
         // --- DOM ELEMENTS ---
         const loadingSpinner = document.getElementById('loading-spinner');
@@ -337,37 +337,61 @@
             }
         }
 
-        // --- INITIALIZATION ---
+        // --- MAIN INITIALIZATION FUNCTION ---
+        function initializeApp(data) {
+            // Check for maintenance mode
+            if (data.webmaintenance && data.webmaintenance.maintenance === 'true') {
+                document.getElementById('maintenance-char').src = data.webmaintenance.karakteranime;
+                document.getElementById('maintenance-text').textContent = data.webmaintenance.teksmaintenance;
+                loadingSpinner.style.display = 'none';
+                maintenancePage.classList.remove('hidden');
+                return; // Stop further execution
+            }
+
+            // Increment visitor count
+            window.firebaseMINNRAI.tambahVisitor('ai').catch(console.error);
+            
+            // Render the rest of the page
+            renderStaticContent(data);
+            renderChatHistory();
+
+            // Attach event listeners
+            chatSendBtn.addEventListener('click', handleSendMessage);
+            chatInput.addEventListener('keypress', (e) => e.key === 'Enter' && handleSendMessage());
+
+            // Hide loader and show main content
+            loadingSpinner.style.display = 'none';
+            mainContent.classList.remove('hidden');
+            mainContent.classList.add('flex');
+        }
+
+        // --- SCRIPT ENTRY POINT ---
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const data = await window.firebaseMINNRAI.getWebData();
                 if (!data) throw new Error("Tidak dapat mengambil data dari server.");
 
                 const loadingIconContainer = document.getElementById('loading-icon-container');
-                if (data.websetting && data.websetting.icon) {
-                    loadingIconContainer.innerHTML = `<img src="${data.websetting.icon}" class="w-20 h-20 rounded-full" alt="Loading Icon">`;
+                const iconUrl = data.websetting?.icon;
+
+                if (iconUrl) {
+                    const loaderIcon = new Image();
+                    loaderIcon.className = 'w-20 h-20 rounded-full';
+                    loaderIcon.alt = 'Memuat...';
+                    
+                    // This is the key fix: Wait for the image to load
+                    loaderIcon.onload = () => initializeApp(data);
+                    loaderIcon.onerror = () => {
+                        console.error("Gagal memuat ikon dari database. Lanjut tanpa ikon.");
+                        initializeApp(data); // Proceed even if icon fails
+                    };
+                    
+                    loadingIconContainer.appendChild(loaderIcon);
+                    loaderIcon.src = iconUrl; // Set src AFTER defining handlers
+                } else {
+                    // If no icon URL, proceed immediately
+                    initializeApp(data);
                 }
-
-                if (data.webmaintenance && data.webmaintenance.maintenance === 'true') {
-                    document.getElementById('maintenance-char').src = data.webmaintenance.karakteranime;
-                    document.getElementById('maintenance-text').textContent = data.webmaintenance.teksmaintenance;
-                    loadingSpinner.style.display = 'none';
-                    maintenancePage.classList.remove('hidden');
-                    return;
-                }
-
-                // Increment visitor count
-                window.firebaseMINNRAI.tambahVisitor('ai').catch(console.error);
-                
-                renderStaticContent(data);
-                renderChatHistory();
-
-                chatSendBtn.addEventListener('click', handleSendMessage);
-                chatInput.addEventListener('keypress', (e) => e.key === 'Enter' && handleSendMessage());
-
-                loadingSpinner.style.display = 'none';
-                mainContent.classList.remove('hidden');
-                mainContent.classList.add('flex');
 
             } catch (err) {
                 console.error("Initialization failed:", err);
