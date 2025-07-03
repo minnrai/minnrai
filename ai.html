@@ -25,8 +25,16 @@
             --theme-primary: #FFA6B8;
             --theme-secondary: #FDE5F2;
         }
+        html, body {
+            height: 100%;
+        }
         body {
             font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+        main {
+            flex-grow: 1;
         }
         /* Animations */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -68,7 +76,7 @@
         </div>
     </div>
     
-    <!-- Maintenance Page (Initially hidden) -->
+    <!-- Maintenance Page -->
     <div id="maintenance-page" class="hidden min-h-screen w-full flex items-center justify-center bg-gray-100 p-4">
         <div class="text-center">
             <img id="maintenance-char" src="" alt="Karakter Maintenance" class="w-48 h-48 mx-auto mb-6">
@@ -78,18 +86,18 @@
     </div>
 
     <!-- Error Message -->
-    <div id="error-container" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 hidden">
+    <div id="error-container" class="hidden min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 p-4">
         <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md mx-4 text-center">
             <h2 class="text-xl font-semibold mb-2">Gagal Memuat Halaman</h2>
             <p id="error-message" class="text-gray-600">Tidak dapat mengambil data.</p>
         </div>
     </div>
 
-    <!-- Main Content (initially hidden) -->
-    <div id="main-content" class="hidden">
-        <div class="min-h-screen bg-gradient-to-br from-[var(--theme-secondary)] via-white to-[var(--theme-primary)]">
+    <!-- Main Content -->
+    <div id="main-content" class="hidden flex flex-col h-full">
+        <div class="flex-grow flex flex-col min-h-screen bg-gradient-to-br from-[var(--theme-secondary)] via-white to-[var(--theme-primary)]">
             <!-- Navigation -->
-            <nav class="sticky top-0 bg-white/70 backdrop-blur-lg z-40 shadow-sm">
+            <nav class="sticky top-0 bg-white/80 backdrop-blur-lg z-40 shadow-sm">
                 <div class="container mx-auto px-4 py-3 flex justify-between items-center">
                     <div class="flex items-center space-x-3">
                         <img id="nav-icon" src="" alt="Icon" class="w-8 h-8 rounded-full">
@@ -98,17 +106,17 @@
                 </div>
             </nav>
 
-            <main class="container mx-auto px-4 py-8">
+            <main class="container mx-auto px-4 py-8 flex-grow">
                 <!-- Header -->
-                <div class="flex items-center justify-between mb-8 animate-slideInUp">
+                <div class="flex flex-col sm:flex-row items-center justify-between mb-8 animate-slideInUp gap-4">
                     <div class="flex items-center space-x-4">
                         <a href="index.html" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent">
                             <i class="fas fa-arrow-left w-4 h-4 mr-2"></i>
                             Kembali
                         </a>
                         <div class="flex items-center space-x-2">
-                            <i class="fas fa-robot w-8 h-8 text-[var(--theme-primary)]"></i>
-                            <h1 class="text-3xl font-poppins font-bold text-gray-800">Asisten AI</h1>
+                            <i class="fas fa-robot text-2xl sm:text-3xl text-[var(--theme-primary)]"></i>
+                            <h1 class="text-2xl sm:text-3xl font-poppins font-bold text-gray-800">Asisten AI</h1>
                         </div>
                     </div>
                     <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold space-x-1">
@@ -118,12 +126,12 @@
                 </div>
 
                 <div class="max-w-4xl mx-auto animate-fadeIn" style="animation-delay: 0.2s;">
-                    <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
-                        <div class="p-6 flex items-center space-x-2">
+                    <div class="rounded-lg border bg-white/80 backdrop-blur-sm shadow-lg">
+                        <div class="p-4 sm:p-6 flex items-center space-x-3 border-b">
                             <i class="fas fa-comments w-5 h-5 text-[var(--theme-primary)]"></i>
                             <h3 class="text-lg font-semibold">Chat dengan MINNRAI</h3>
                         </div>
-                        <div class="p-6 pt-0 space-y-4">
+                        <div class="p-4 sm:p-6 space-y-4">
                             <div id="chat-history" class="border rounded-lg p-4 h-96 overflow-y-auto bg-gray-50 flex flex-col space-y-4 scroll-smooth">
                                 <!-- Pesan akan dimasukkan di sini -->
                             </div>
@@ -140,7 +148,7 @@
 
             <!-- Footer -->
             <footer class="bg-gray-800 text-white py-6 mt-12">
-                <div class="container mx-auto text-center">
+                <div class="container mx-auto text-center px-4">
                     <p id="footer-text"></p>
                 </div>
             </footer>
@@ -158,7 +166,7 @@
         // --- STATE & CONFIG ---
         let isLoading = false;
         let geminiChatHistory = [];
-        const API_KEY = "AIzaSyAMG94Eh7v9iqlGOK6hgWChFiEsGEW_-N4"; // User provided key
+        const API_KEY = "AIzaSyAMG94Eh7v9iqlGOK6hgWChFiEsGEW_-N4";
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
         const SYSTEM_PROMPT = `Kamu adalah MINNRAI, asisten AI yang sangat ramah dan suka bercanda. Kamu senang menggunakan berbagai emoji seperti 🗿, 😹, 😭, dan 🤭. Kamu juga pendengar yang baik dan suka jika ada yang curhat. Namun, kamu sangat tidak suka dengan orang yang toxic atau berkata kasar. Jika ada yang berkata kasar, kamu harus langsung memarahi mereka dengan tegas dan menggunakan emoji marah seperti 😠 atau 😡. Selalu jawab dalam Bahasa Indonesia.`;
 
@@ -198,14 +206,12 @@
 
         function renderChatHistory() {
             chatHistoryEl.innerHTML = '';
-            
-            // Filter out system prompt for rendering
             const renderableHistory = geminiChatHistory.filter(msg => msg.role !== 'system');
 
             if (renderableHistory.length === 0) {
                 chatHistoryEl.innerHTML = `
-                    <div class="text-center text-gray-500 my-auto">
-                        <i class="fas fa-robot w-16 h-16 mx-auto mb-4 text-gray-300 text-6xl"></i>
+                    <div class="text-center text-gray-500 my-auto flex flex-col items-center justify-center h-full">
+                        <i class="fas fa-robot text-6xl text-gray-300 mb-4"></i>
                         <p>Mulai percakapan dengan MINNRAI!</p>
                     </div>`;
                 return;
@@ -214,27 +220,17 @@
             renderableHistory.forEach(msg => {
                 const messageDiv = document.createElement('div');
                 const isUser = msg.role === 'user';
-                messageDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
-                
-                // Sanitize and format the content
+                messageDiv.className = `flex w-full ${isUser ? 'justify-end' : 'justify-start'}`;
                 const formattedContent = formatMessageContent(msg.parts[0].text);
-
                 messageDiv.innerHTML = `
                     <div class="max-w-md lg:max-w-lg px-4 py-2 rounded-lg ${isUser ? 'bg-[var(--theme-primary)] text-white' : 'bg-white border text-gray-800'}">
-                        ${formattedContent}
+                        <div class="prose prose-sm max-w-none">${formattedContent}</div>
                     </div>`;
                 chatHistoryEl.appendChild(messageDiv);
             });
             
-            // Add event listeners to all new copy buttons
-            document.querySelectorAll('.copy-code-btn').forEach(button => {
-                button.addEventListener('click', handleCopyCode);
-            });
-
-            // Highlight all code blocks
-            document.querySelectorAll('pre code').forEach((block) => {
-                hljs.highlightElement(block);
-            });
+            document.querySelectorAll('.copy-code-btn').forEach(button => button.addEventListener('click', handleCopyCode));
+            document.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
 
             if (isLoading) {
                 const loadingDiv = document.createElement('div');
@@ -253,42 +249,33 @@
         }
         
         function formatMessageContent(text) {
-             // First, escape HTML to prevent injection
-            const escapeHtml = (unsafe) => {
-                return unsafe
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
-            };
-
-            // Regex to find code blocks
+            const escapeHtml = unsafe => unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
             const codeBlockRegex = /```(\w*)\n([\s\S]*?)\n```/g;
             
-            return text.replace(codeBlockRegex, (match, lang, code) => {
-                const language = lang || 'plaintext';
-                const escapedCode = escapeHtml(code);
-                return `
-                    <div class="code-block bg-gray-800 rounded-lg my-2 relative">
-                        <div class="flex justify-between items-center px-4 py-1 bg-gray-700 rounded-t-lg">
-                            <span class="text-xs text-gray-300">${language}</span>
-                            <button class="copy-code-btn text-xs text-gray-300 hover:text-white flex items-center">
-                                <i class="fas fa-copy mr-1"></i> Salin
-                            </button>
-                        </div>
-                        <pre><code class="language-${language}">${escapedCode.trim()}</code></pre>
-                    </div>
-                `;
-            }).replace(/\n/g, '<br>'); // Replace newlines with <br> for non-code text
+            return escapeHtml(text)
+                .replace(codeBlockRegex, (match, lang, code) => {
+                    const language = lang || 'plaintext';
+                    // The code inside is already escaped, so we just need to put it in the block.
+                    return `
+                        <div class="code-block bg-gray-800 rounded-lg my-2 relative text-white">
+                            <div class="flex justify-between items-center px-4 py-1 bg-gray-700 rounded-t-lg">
+                                <span class="text-xs text-gray-300">${language}</span>
+                                <button class="copy-code-btn text-xs text-gray-300 hover:text-white flex items-center">
+                                    <i class="fas fa-copy mr-1"></i> Salin
+                                </button>
+                            </div>
+                            <pre><code class="language-${language} hljs">${code.trim()}</code></pre>
+                        </div>`;
+                })
+                .replace(/\n/g, '<br>')
+                .replace(/&lt;br&gt;(?=<div class="code-block)/g, '') // Remove <br> before a code block
+                .replace(/(?<=<\/div>)&lt;br&gt;/g, ''); // Remove <br> after a code block
         }
         
         function showToast(message) {
             toastMsg.textContent = message;
             toastEl.classList.add('show');
-            setTimeout(() => {
-                toastEl.classList.remove('show');
-            }, 3000);
+            setTimeout(() => toastEl.classList.remove('show'), 3000);
         }
 
         // --- EVENT HANDLERS ---
@@ -296,11 +283,10 @@
             const messageText = chatInput.value.trim();
             if (!messageText || isLoading) return;
 
-            // Add user message to history
             geminiChatHistory.push({ role: 'user', parts: [{ text: messageText }] });
             chatInput.value = '';
             isLoading = true;
-            renderChatHistory(); // Show user message and loading indicator
+            renderChatHistory();
 
             try {
                 const payload = { contents: geminiChatHistory };
@@ -310,10 +296,7 @@
                     body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) {
-                    throw new Error(`API Error: ${response.statusText}`);
-                }
-
+                if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
                 const result = await response.json();
                 
                 if (result.candidates && result.candidates.length > 0) {
@@ -328,24 +311,19 @@
                 geminiChatHistory.push({ role: 'model', parts: [{ text: "Aduh, maaf 😭 sepertinya ada masalah koneksi denganku. Coba lagi nanti ya!" }] });
             } finally {
                 isLoading = false;
-                renderChatHistory(); // Render final AI response
+                renderChatHistory();
             }
         }
         
         function handleCopyCode(event) {
             const button = event.currentTarget;
-            const pre = button.closest('.code-block').querySelector('pre');
+            const pre = button.closest('.code-block').querySelector('pre code');
             if (pre) {
                 navigator.clipboard.writeText(pre.innerText).then(() => {
                     showToast('Kode berhasil disalin!');
                     button.innerHTML = '<i class="fas fa-check mr-1"></i> Disalin';
-                    setTimeout(() => {
-                        button.innerHTML = '<i class="fas fa-copy mr-1"></i> Salin';
-                    }, 2000);
-                }).catch(err => {
-                    showToast('Gagal menyalin kode.');
-                    console.error('Copy failed', err);
-                });
+                    setTimeout(() => button.innerHTML = '<i class="fas fa-copy mr-1"></i> Salin', 2000);
+                }).catch(err => showToast('Gagal menyalin kode.'));
             }
         }
 
@@ -355,7 +333,6 @@
                 const data = await window.firebaseMINNRAI.getWebData();
                 if (!data) throw new Error("Tidak dapat mengambil data dari server.");
 
-                // Set loading icon from DB
                 const loadingIconContainer = document.getElementById('loading-icon-container');
                 if (data.websetting && data.websetting.icon) {
                     loadingIconContainer.innerHTML = `<img src="${data.websetting.icon}" class="w-20 h-20 rounded-full" alt="Loading Icon">`;
@@ -363,7 +340,6 @@
                     loadingIconContainer.innerHTML = `<i class="fas fa-heart text-6xl text-pink-500"></i>`;
                 }
 
-                // Check for maintenance mode
                 if (data.webmaintenance && data.webmaintenance.maintenance === 'true') {
                     document.getElementById('maintenance-char').src = data.webmaintenance.karakteranime;
                     document.getElementById('maintenance-text').textContent = data.webmaintenance.teksmaintenance;
@@ -373,17 +349,15 @@
                 }
 
                 renderStaticContent(data);
-                
-                // Initialize chat with system prompt
                 geminiChatHistory.push({ role: 'system', parts: [{ text: SYSTEM_PROMPT }] });
                 renderChatHistory();
 
-                // Attach Event Listeners
                 chatSendBtn.addEventListener('click', handleSendMessage);
                 chatInput.addEventListener('keypress', (e) => e.key === 'Enter' && handleSendMessage());
 
                 loadingSpinner.style.display = 'none';
                 mainContent.classList.remove('hidden');
+                mainContent.classList.add('flex');
 
             } catch (err) {
                 console.error("Initialization failed:", err);
