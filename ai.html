@@ -72,7 +72,7 @@
     <!-- Loading Spinner -->
     <div id="loading-spinner" class="min-h-screen flex items-center justify-center bg-white">
         <div id="loading-icon-container" class="animate-pulse-icon">
-            <!-- Ikon dari database akan dimasukkan di sini oleh JavaScript -->
+            <svg id="loading-heart-svg" class="w-20 h-20 text-pink-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
         </div>
     </div>
     
@@ -337,61 +337,43 @@
             }
         }
 
-        // --- MAIN INITIALIZATION FUNCTION ---
-        function initializeApp(data) {
-            // Check for maintenance mode
-            if (data.webmaintenance && data.webmaintenance.maintenance === 'true') {
-                document.getElementById('maintenance-char').src = data.webmaintenance.karakteranime;
-                document.getElementById('maintenance-text').textContent = data.webmaintenance.teksmaintenance;
-                loadingSpinner.style.display = 'none';
-                maintenancePage.classList.remove('hidden');
-                return; // Stop further execution
-            }
-
-            // Increment visitor count
-            window.firebaseMINNRAI.tambahVisitor('ai').catch(console.error);
-            
-            // Render the rest of the page
-            renderStaticContent(data);
-            renderChatHistory();
-
-            // Attach event listeners
-            chatSendBtn.addEventListener('click', handleSendMessage);
-            chatInput.addEventListener('keypress', (e) => e.key === 'Enter' && handleSendMessage());
-
-            // Hide loader and show main content
-            loadingSpinner.style.display = 'none';
-            mainContent.classList.remove('hidden');
-            mainContent.classList.add('flex');
-        }
-
         // --- SCRIPT ENTRY POINT ---
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const data = await window.firebaseMINNRAI.getWebData();
                 if (!data) throw new Error("Tidak dapat mengambil data dari server.");
 
-                const loadingIconContainer = document.getElementById('loading-icon-container');
-                const iconUrl = data.websetting?.icon;
-
-                if (iconUrl) {
-                    const loaderIcon = new Image();
-                    loaderIcon.className = 'w-20 h-20 rounded-full';
-                    loaderIcon.alt = 'Memuat...';
-                    
-                    // This is the key fix: Wait for the image to load
-                    loaderIcon.onload = () => initializeApp(data);
-                    loaderIcon.onerror = () => {
-                        console.error("Gagal memuat ikon dari database. Lanjut tanpa ikon.");
-                        initializeApp(data); // Proceed even if icon fails
-                    };
-                    
-                    loadingIconContainer.appendChild(loaderIcon);
-                    loaderIcon.src = iconUrl; // Set src AFTER defining handlers
-                } else {
-                    // If no icon URL, proceed immediately
-                    initializeApp(data);
+                // ** PERBAIKAN UTAMA DI SINI **
+                // 1. Atur warna loading heart dari database
+                const loadingHeart = document.getElementById('loading-heart-svg');
+                if (data.websetting && data.websetting.color) {
+                    loadingHeart.style.color = '#' + data.websetting.color;
                 }
+
+                // 2. Periksa maintenance mode
+                if (data.webmaintenance && data.webmaintenance.maintenance === 'true') {
+                    document.getElementById('maintenance-char').src = data.webmaintenance.karakteranime;
+                    document.getElementById('maintenance-text').textContent = data.webmaintenance.teksmaintenance;
+                    loadingSpinner.style.display = 'none';
+                    maintenancePage.classList.remove('hidden');
+                    return; // Hentikan eksekusi jika maintenance
+                }
+
+                // 3. Tambah visitor
+                window.firebaseMINNRAI.tambahVisitor('ai').catch(console.error);
+                
+                // 4. Render konten utama
+                renderStaticContent(data);
+                renderChatHistory();
+
+                // 5. Pasang event listeners
+                chatSendBtn.addEventListener('click', handleSendMessage);
+                chatInput.addEventListener('keypress', (e) => e.key === 'Enter' && handleSendMessage());
+
+                // 6. Tampilkan halaman setelah semuanya siap
+                loadingSpinner.style.display = 'none';
+                mainContent.classList.remove('hidden');
+                mainContent.classList.add('flex');
 
             } catch (err) {
                 console.error("Initialization failed:", err);
