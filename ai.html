@@ -72,7 +72,7 @@
     <!-- Loading Spinner -->
     <div id="loading-spinner" class="min-h-screen flex items-center justify-center bg-white">
         <div id="loading-icon-container" class="animate-pulse-icon">
-            <!-- Icon from DB will be injected here -->
+             <i class="fas fa-heart text-6xl text-pink-500"></i> <!-- Default loader -->
         </div>
     </div>
     
@@ -167,7 +167,7 @@
         let isLoading = false;
         let geminiChatHistory = [];
         const API_KEY = "AIzaSyAMG94Eh7v9iqlGOK6hgWChFiEsGEW_-N4";
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
         const SYSTEM_PROMPT = `Kamu adalah MINNRAI, asisten AI yang sangat ramah dan suka bercanda. Kamu senang menggunakan berbagai emoji seperti 🗿, 😹, 😭, dan 🤭. Kamu juga pendengar yang baik dan suka jika ada yang curhat. Namun, kamu sangat tidak suka dengan orang yang toxic atau berkata kasar. Jika ada yang berkata kasar, kamu harus langsung memarahi mereka dengan tegas dan menggunakan emoji marah seperti 😠 atau 😡. Selalu jawab dalam Bahasa Indonesia.`;
 
         // --- DOM ELEMENTS ---
@@ -206,7 +206,7 @@
 
         function renderChatHistory() {
             chatHistoryEl.innerHTML = '';
-            const renderableHistory = geminiChatHistory.filter(msg => msg.role !== 'system');
+            const renderableHistory = geminiChatHistory; // No need to filter system prompt anymore
 
             if (renderableHistory.length === 0) {
                 chatHistoryEl.innerHTML = `
@@ -252,24 +252,24 @@
             const escapeHtml = unsafe => unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
             const codeBlockRegex = /```(\w*)\n([\s\S]*?)\n```/g;
             
-            return escapeHtml(text)
-                .replace(codeBlockRegex, (match, lang, code) => {
-                    const language = lang || 'plaintext';
-                    // The code inside is already escaped, so we just need to put it in the block.
-                    return `
-                        <div class="code-block bg-gray-800 rounded-lg my-2 relative text-white">
-                            <div class="flex justify-between items-center px-4 py-1 bg-gray-700 rounded-t-lg">
-                                <span class="text-xs text-gray-300">${language}</span>
-                                <button class="copy-code-btn text-xs text-gray-300 hover:text-white flex items-center">
-                                    <i class="fas fa-copy mr-1"></i> Salin
-                                </button>
-                            </div>
-                            <pre><code class="language-${language} hljs">${code.trim()}</code></pre>
-                        </div>`;
-                })
-                .replace(/\n/g, '<br>')
-                .replace(/&lt;br&gt;(?=<div class="code-block)/g, '') // Remove <br> before a code block
-                .replace(/(?<=<\/div>)&lt;br&gt;/g, ''); // Remove <br> after a code block
+            let html = text.replace(codeBlockRegex, (match, lang, code) => {
+                const language = lang || 'plaintext';
+                const escapedCode = escapeHtml(code);
+                return `
+                    </div></div> <!-- Close previous message bubble for code block -->
+                    <div class="code-block bg-gray-800 rounded-lg my-2 relative text-white w-full">
+                        <div class="flex justify-between items-center px-4 py-1 bg-gray-700 rounded-t-lg">
+                            <span class="text-xs text-gray-300">${language}</span>
+                            <button class="copy-code-btn text-xs text-gray-300 hover:text-white flex items-center">
+                                <i class="fas fa-copy mr-1"></i> Salin
+                            </button>
+                        </div>
+                        <pre><code class="language-${language} hljs p-4 block overflow-x-auto">${escapedCode.trim()}</code></pre>
+                    </div>
+                    <div><div> <!-- Re-open message bubble after code block -->
+                `;
+            });
+            return html.replace(/\n/g, '<br>');
         }
         
         function showToast(message) {
@@ -289,26 +289,37 @@
             renderChatHistory();
 
             try {
-                const payload = { contents: geminiChatHistory };
+                const payload = {
+                    contents: geminiChatHistory,
+                    systemInstruction: {
+                        parts: [{ text: SYSTEM_PROMPT }]
+                    }
+                };
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+                if (!response.ok) {
+                    const errorBody = await response.json();
+                    console.error("API Error Body:", errorBody);
+                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                }
                 const result = await response.json();
                 
                 if (result.candidates && result.candidates.length > 0) {
                     const aiText = result.candidates[0].content.parts[0].text;
                     geminiChatHistory.push({ role: 'model', parts: [{ text: aiText }] });
                 } else {
-                    throw new Error("No response from AI.");
+                     // Handle cases where the response might be blocked or empty
+                    const blockReason = result.promptFeedback?.blockReason || 'Tidak ada respons dari AI';
+                    throw new Error(`Permintaan diblokir: ${blockReason}`);
                 }
 
             } catch (error) {
                 console.error("Gemini API call failed:", error);
-                geminiChatHistory.push({ role: 'model', parts: [{ text: "Aduh, maaf 😭 sepertinya ada masalah koneksi denganku. Coba lagi nanti ya!" }] });
+                geminiChatHistory.push({ role: 'model', parts: [{ text: `Aduh, maaf 😭 sepertinya ada masalah koneksi denganku. Coba lagi nanti ya! Error: ${error.message}` }] });
             } finally {
                 isLoading = false;
                 renderChatHistory();
@@ -336,8 +347,6 @@
                 const loadingIconContainer = document.getElementById('loading-icon-container');
                 if (data.websetting && data.websetting.icon) {
                     loadingIconContainer.innerHTML = `<img src="${data.websetting.icon}" class="w-20 h-20 rounded-full" alt="Loading Icon">`;
-                } else {
-                    loadingIconContainer.innerHTML = `<i class="fas fa-heart text-6xl text-pink-500"></i>`;
                 }
 
                 if (data.webmaintenance && data.webmaintenance.maintenance === 'true') {
@@ -348,8 +357,10 @@
                     return;
                 }
 
+                // Increment visitor count
+                window.firebaseMINNRAI.tambahVisitor('ai').catch(console.error);
+                
                 renderStaticContent(data);
-                geminiChatHistory.push({ role: 'system', parts: [{ text: SYSTEM_PROMPT }] });
                 renderChatHistory();
 
                 chatSendBtn.addEventListener('click', handleSendMessage);
