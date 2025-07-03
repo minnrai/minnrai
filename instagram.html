@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Downloader</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome (for icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Google Fonts (Poppins) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --theme-primary: #3b82f6; /* Default blue */
+            --theme-secondary: #ec4899; /* Default pink */
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        /* Custom styles for Tabs */
+        .tabs-trigger[data-state='active'] {
+            background-color: white;
+            color: #1f2937; /* gray-800 */
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        /* Simple CSS Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
+        .animate-slideInUp { animation: slideInUp 0.5s ease-out forwards; }
+        .animate-spin-custom { animation: rotate 1s linear infinite; }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="min-h-screen flex items-center justify-center">
+        <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>
+    </div>
+
+    <!-- Error Message on Page Load -->
+    <div id="error-container" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 hidden">
+        <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md mx-4 text-center">
+            <h2 class="text-xl font-semibold mb-2">Error Loading Page</h2>
+            <p id="error-message" class="text-gray-600">Could not fetch data.</p>
+        </div>
+    </div>
+
+    <!-- Main Content (initially hidden) -->
+    <div id="main-content" class="hidden">
+        <div class="min-h-screen bg-gradient-to-br from-theme-secondary via-white to-theme-primary">
+            <!-- Navigation -->
+            <nav class="sticky top-0 bg-white/70 backdrop-blur-lg z-40 shadow-sm">
+                <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                    <h1 id="nav-title" class="text-xl font-bold text-gray-800">WebApp</h1>
+                    <a href="#" class="bg-gray-800 text-white px-4 py-2 rounded-full text-sm hover:bg-gray-900 transition">Get Started</a>
+                </div>
+            </nav>
+
+            <main class="container mx-auto px-4 py-8">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-8 animate-slideInUp">
+                    <div class="flex items-center space-x-4">
+                        <a href="index.html" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent">
+                            <i class="fas fa-arrow-left w-4 h-4 mr-2"></i>
+                            Back to Home
+                        </a>
+                        <div class="flex items-center space-x-2">
+                            <i class="fab fa-instagram text-2xl text-pink-500"></i>
+                            <h1 class="text-3xl font-poppins font-bold text-gray-800">Instagram Downloader</h1>
+                        </div>
+                    </div>
+                    <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold space-x-1">
+                        <i class="fas fa-eye w-4 h-4"></i>
+                        <span id="visitor-count">0 visitors</span>
+                    </div>
+                </div>
+
+                <div class="max-w-2xl mx-auto">
+                    <!-- Download Form -->
+                    <div class="animate-fadeIn mb-6" style="animation-delay: 0.2s;">
+                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                            <div class="p-6 flex items-center space-x-2">
+                                <i class="fas fa-download w-5 h-5"></i>
+                                <h3 class="text-lg font-semibold">Download Instagram Content</h3>
+                            </div>
+                            <div class="p-6 pt-0 space-y-4">
+                                <!-- Content Type Tabs -->
+                                <div id="tabs-list" class="grid w-full grid-cols-3 p-1 h-10 items-center justify-center rounded-lg bg-muted text-muted-foreground bg-gray-200">
+                                    <button data-value="post" class="tabs-trigger flex items-center justify-center space-x-1 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium" data-state="active">
+                                        <i class="fas fa-image w-4 h-4"></i><span>Post</span>
+                                    </button>
+                                    <button data-value="story" class="tabs-trigger flex items-center justify-center space-x-1 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium" data-state="inactive">
+                                        <i class="fas fa-camera w-4 h-4"></i><span>Story</span>
+                                    </button>
+                                    <button data-value="reel" class="tabs-trigger flex items-center justify-center space-x-1 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium" data-state="inactive">
+                                        <i class="fas fa-video w-4 h-4"></i><span>Reel</span>
+                                    </button>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Instagram URL</label>
+                                    <input id="url-input" type="url" placeholder="https://www.instagram.com/p/..." class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                                </div>
+                                <div id="form-error" class="hidden items-center rounded-lg border border-red-300 bg-red-50 text-red-700 p-3 text-sm">
+                                    <i class="fas fa-exclamation-circle h-4 w-4 mr-2"></i>
+                                    <span id="form-error-msg"></span>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button id="download-btn" class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 bg-[var(--theme-primary)] text-white hover:bg-[var(--theme-primary)]/90 disabled:opacity-50"></button>
+                                    <button id="reset-btn" class="hidden inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 border border-input bg-background hover:bg-accent">Reset</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Download Result -->
+                    <div id="result-card" class="hidden animate-fadeIn">
+                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                            <div class="p-6"><h3 class="text-lg font-semibold">Download Ready</h3></div>
+                            <div class="p-6 pt-0">
+                                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                                    <img id="result-thumbnail" src="" alt="Content thumbnail" class="w-24 h-32 object-cover rounded-lg mx-auto sm:mx-0">
+                                    <div id="result-info" class="flex-1">
+                                        <!-- Result details will be injected here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div class="mt-8 animate-fadeIn" style="animation-delay: 0.4s;">
+                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                             <div class="p-6"><h3 class="text-lg font-semibold">How to use Instagram Downloader</h3></div>
+                             <div class="p-6 pt-0 space-y-4">
+                                <div>
+                                    <h4 class="font-semibold mb-2">For Posts & Reels:</h4>
+                                    <ol class="list-decimal list-inside space-y-1 text-gray-600 text-sm">
+                                        <li>Open Instagram and find the content you want to download</li>
+                                        <li>Tap the three dots (...) or the share icon (paper plane)</li>
+                                        <li>Select "Copy Link"</li>
+                                        <li>Paste the link here and click Download</li>
+                                    </ol>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold mb-2">For Stories:</h4>
+                                    <ol class="list-decimal list-inside space-y-1 text-gray-600 text-sm">
+                                        <li>View the story you want to download</li>
+                                        <li>Copy the story URL from your browser's address bar</li>
+                                        <li>Paste it in the Story tab above and click Download</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="bg-gray-800 text-white py-6 mt-12">
+                <div class="container mx-auto text-center">
+                    <p>&copy; 2024 <span id="footer-title">WebApp</span>. All Rights Reserved.</p>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script type="module">
+        import './firebase-init.js';
+
+        // --- STATE & DOM ELEMENTS ---
+        let isLoading = false;
+        let contentType = 'post';
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const errorContainer = document.getElementById('error-container');
+        const pageErrorMessage = document.getElementById('error-message');
+        const mainContent = document.getElementById('main-content');
+        const urlInput = document.getElementById('url-input');
+        const downloadBtn = document.getElementById('download-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const formError = document.getElementById('form-error');
+        const formErrorMsg = document.getElementById('form-error-msg');
+        const resultCard = document.getElementById('result-card');
+        const tabsList = document.getElementById('tabs-list');
+
+        // --- UI UPDATE FUNCTIONS ---
+        function updateTheme(root, color, gradation) {
+            if (color) root.style.setProperty('--theme-primary', color);
+            if (gradation) root.style.setProperty('--theme-secondary', gradation);
+        }
+
+        function renderStaticContent(data) {
+            const websetting = data.websetting;
+            if (websetting) {
+                updateTheme(document.documentElement, websetting.color, websetting.gradation);
+                document.title = `${websetting.name} - Instagram Downloader`;
+                document.getElementById('nav-title').textContent = websetting.name;
+                document.getElementById('footer-title').textContent = websetting.name;
+            }
+            document.getElementById('visitor-count').textContent = `${(data.instagram?.visitor || 0).toLocaleString()} visitors`;
+        }
+
+        function setButtonState(loading) {
+            isLoading = loading;
+            downloadBtn.disabled = loading;
+            if (loading) {
+                downloadBtn.innerHTML = `<div class="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin-custom"></div> Processing...`;
+            } else {
+                downloadBtn.innerHTML = `<i class="fas fa-download w-4 h-4 mr-2"></i> Download`;
+            }
+        }
+
+        function showError(message) {
+            formErrorMsg.textContent = message;
+            formError.classList.remove('hidden');
+            formError.classList.add('flex');
+            resetBtn.classList.remove('hidden');
+        }
+
+        function hideError() {
+            formError.classList.add('hidden');
+        }
+
+        function renderResult(data) {
+            document.getElementById('result-thumbnail').src = data.thumbnail;
+            const infoContainer = document.getElementById('result-info');
+            
+            let mediaButtonsHTML = data.media.map((item, index) => `
+                <a href="${item.url}" class="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 bg-[var(--theme-primary)] text-white hover:bg-[var(--theme-primary)]/90">
+                    <i class="fas fa-download w-4 h-4 mr-2"></i>
+                    Download ${item.type === 'image' ? 'Image' : 'Video'} ${data.media.length > 1 ? index + 1 : ''}
+                    ${item.duration ? `(${item.duration})` : ''}
+                </a>`).join('');
+
+            infoContainer.innerHTML = `
+                <div class="flex items-center space-x-2 mb-2">
+                    <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold capitalize">${data.type}</div>
+                    <span class="text-gray-600">By ${data.author}</span>
+                </div>
+                ${data.caption ? `<p class="text-sm text-gray-600 mb-4 line-clamp-2">${data.caption}</p>` : ''}
+                <div class="space-y-2">${mediaButtonsHTML}</div>
+            `;
+            
+            resultCard.classList.remove('hidden');
+            resetBtn.classList.remove('hidden');
+        }
+
+        // --- EVENT HANDLERS ---
+        function handleReset() {
+            urlInput.value = '';
+            hideError();
+            resultCard.classList.add('hidden');
+            resetBtn.classList.add('hidden');
+            setButtonState(false);
+        }
+
+        function handleTabClick(event) {
+            const clickedTab = event.target.closest('.tabs-trigger');
+            if (!clickedTab) return;
+
+            contentType = clickedTab.dataset.value;
+
+            // Update tab buttons state
+            tabsList.querySelectorAll('.tabs-trigger').forEach(tab => {
+                tab.dataset.state = tab === clickedTab ? 'active' : 'inactive';
+            });
+            
+            // Update placeholder
+            const placeholders = {
+                post: 'https://www.instagram.com/p/...',
+                story: 'https://www.instagram.com/stories/...',
+                reel: 'https://www.instagram.com/reel/...'
+            };
+            urlInput.placeholder = placeholders[contentType];
+        }
+
+        async function handleDownload() {
+            const url = urlInput.value.trim();
+            handleReset(); // Reset previous state
+
+            if (!url) {
+                showError('Please enter an Instagram URL');
+                return;
+            }
+            if (!url.includes('instagram.com')) {
+                showError('Please enter a valid Instagram URL');
+                return;
+            }
+
+            setButtonState(true);
+
+            // Simulate API call
+            setTimeout(() => {
+                try {
+                    const mockData = {
+                        post: { type: 'post', caption: 'Beautiful sunset view from the mountains 🌅', author: '@photographer', thumbnail: 'https://placehold.co/400x400/E1306C/FFFFFF?text=Post', media: [{ type: 'image', url: '#'}, { type: 'image', url: '#'}] },
+                        story: { type: 'story', author: '@username', thumbnail: 'https://placehold.co/300x500/F77737/FFFFFF?text=Story', media: [{ type: 'video', url: '#', duration: '0:15' }] },
+                        reel: { type: 'reel', caption: 'Amazing dance moves! 💃', author: '@dancer', thumbnail: 'https://placehold.co/300x500/C13584/FFFFFF?text=Reel', media: [{ type: 'video', url: '#', duration: '0:30' }] }
+                    };
+                    renderResult(mockData[contentType]);
+                } catch (err) {
+                    showError('Failed to process Instagram URL. Please try again.');
+                } finally {
+                    setButtonState(false);
+                }
+            }, 2000);
+        }
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const data = await window.firebaseMINNRAI.getWebData();
+                if (!data) throw new Error("No data received from Firebase.");
+
+                renderStaticContent(data);
+                setButtonState(false);
+
+                // Attach Event Listeners
+                downloadBtn.addEventListener('click', handleDownload);
+                resetBtn.addEventListener('click', handleReset);
+                tabsList.addEventListener('click', handleTabClick);
+
+                loadingSpinner.style.display = 'none';
+                mainContent.style.display = 'block';
+
+            } catch (err) {
+                console.error("Initialization failed:", err);
+                loadingSpinner.style.display = 'none';
+                pageErrorMessage.textContent = err.message;
+                errorContainer.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

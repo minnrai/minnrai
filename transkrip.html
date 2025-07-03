@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Transcript Generator</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome (for icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Google Fonts (Poppins) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --theme-primary: #3b82f6; /* Default blue */
+            --theme-secondary: #ec4899; /* Default pink */
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        /* Simple CSS Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
+        .animate-slideInUp { animation: slideInUp 0.5s ease-out forwards; }
+        .animate-spin-custom { animation: rotate 1s linear infinite; }
+        
+        /* Toast Notification */
+        #toast-notification {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        #toast-notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="min-h-screen flex items-center justify-center">
+        <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>
+    </div>
+
+    <!-- Error Message on Page Load -->
+    <div id="error-container" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 hidden">
+        <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md mx-4 text-center">
+            <h2 class="text-xl font-semibold mb-2">Error Loading Page</h2>
+            <p id="error-message" class="text-gray-600">Could not fetch data.</p>
+        </div>
+    </div>
+
+    <!-- Main Content (initially hidden) -->
+    <div id="main-content" class="hidden">
+        <div class="min-h-screen bg-gradient-to-br from-theme-secondary via-white to-theme-primary">
+            <!-- Navigation -->
+            <nav class="sticky top-0 bg-white/70 backdrop-blur-lg z-40 shadow-sm">
+                <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                    <h1 id="nav-title" class="text-xl font-bold text-gray-800">WebApp</h1>
+                    <a href="#" class="bg-gray-800 text-white px-4 py-2 rounded-full text-sm hover:bg-gray-900 transition">Get Started</a>
+                </div>
+            </nav>
+
+            <main class="container mx-auto px-4 py-8">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-8 animate-slideInUp">
+                    <div class="flex items-center space-x-4">
+                        <a href="index.html" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent">
+                            <i class="fas fa-arrow-left w-4 h-4 mr-2"></i>
+                            Back to Home
+                        </a>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-file-alt w-8 h-8 text-blue-500"></i>
+                            <h1 class="text-3xl font-poppins font-bold text-gray-800">Video Transcript</h1>
+                        </div>
+                    </div>
+                    <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold space-x-1">
+                        <i class="fas fa-eye w-4 h-4"></i>
+                        <span id="visitor-count">0 visitors</span>
+                    </div>
+                </div>
+
+                <div class="max-w-4xl mx-auto">
+                    <!-- Generator Form -->
+                    <div class="animate-fadeIn mb-6" style="animation-delay: 0.2s;">
+                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                            <div class="p-6 flex items-center space-x-2">
+                                <i class="fas fa-file-alt w-5 h-5"></i>
+                                <h3 class="text-lg font-semibold">Generate Video Transcript</h3>
+                            </div>
+                            <div class="p-6 pt-0 space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium mb-2">YouTube URL</label>
+                                        <input id="url-input" type="url" placeholder="https://www.youtube.com/watch?v=..." class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Language</label>
+                                        <select id="language-select" class="h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"></select>
+                                    </div>
+                                </div>
+                                <div id="form-error" class="hidden items-center rounded-lg border border-red-300 bg-red-50 text-red-700 p-3 text-sm">
+                                    <i class="fas fa-exclamation-circle h-4 w-4 mr-2"></i>
+                                    <span id="form-error-msg"></span>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button id="generate-btn" class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 bg-[var(--theme-primary)] text-white hover:bg-[var(--theme-primary)]/90 disabled:opacity-50"></button>
+                                    <button id="reset-btn" class="hidden inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 border border-input bg-background hover:bg-accent">Reset</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transcript Result -->
+                    <div id="result-card" class="hidden animate-fadeIn">
+                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                            <div class="p-6 flex items-center justify-between">
+                                <h3 class="text-lg font-semibold">Generated Transcript</h3>
+                                <div class="flex space-x-2">
+                                    <button id="copy-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent">
+                                        <i class="fas fa-copy w-4 h-4 mr-2"></i>Copy
+                                    </button>
+                                    <button id="download-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent">
+                                        <i class="fas fa-download w-4 h-4 mr-2"></i>Download
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="p-6 pt-0">
+                                <textarea id="transcript-output" class="min-h-[400px] w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-sm" placeholder="Transcript will appear here..."></textarea>
+                                <div class="mt-4 flex items-center justify-between text-sm text-gray-500">
+                                    <span id="transcript-stats"></span>
+                                    <span id="transcript-language"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Other sections... -->
+
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="bg-gray-800 text-white py-6 mt-12">
+                <div class="container mx-auto text-center">
+                    <p>&copy; 2024 <span id="footer-title">WebApp</span>. All Rights Reserved.</p>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-notification" class="fixed bottom-5 right-5 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg">
+        <span id="toast-message"></span>
+    </div>
+
+    <script type="module">
+        import './firebase-init.js';
+
+        // --- STATE & CONFIG ---
+        let isLoading = false;
+        const LANGUAGE_OPTIONS = [
+            { value: 'auto', label: 'Auto Detect' }, { value: 'en', label: 'English' }, { value: 'es', label: 'Spanish' },
+            { value: 'fr', label: 'French' }, { value: 'de', label: 'German' }, { value: 'it', label: 'Italian' },
+            { value: 'pt', label: 'Portuguese' }, { value: 'ru', label: 'Russian' }, { value: 'ja', label: 'Japanese' },
+            { value: 'ko', label: 'Korean' }, { value: 'zh', label: 'Chinese' }, { value: 'id', label: 'Indonesian' }
+        ];
+
+        // --- DOM ELEMENTS ---
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const errorContainer = document.getElementById('error-container');
+        const pageErrorMessage = document.getElementById('error-message');
+        const mainContent = document.getElementById('main-content');
+        const urlInput = document.getElementById('url-input');
+        const languageSelect = document.getElementById('language-select');
+        const generateBtn = document.getElementById('generate-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const formError = document.getElementById('form-error');
+        const formErrorMsg = document.getElementById('form-error-msg');
+        const resultCard = document.getElementById('result-card');
+        const transcriptOutput = document.getElementById('transcript-output');
+        const copyBtn = document.getElementById('copy-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const toastEl = document.getElementById('toast-notification');
+        const toastMsg = document.getElementById('toast-message');
+
+        // --- UI UPDATE FUNCTIONS ---
+        function updateTheme(root, color, gradation) {
+            if (color) root.style.setProperty('--theme-primary', color);
+            if (gradation) root.style.setProperty('--theme-secondary', gradation);
+        }
+
+        function renderStaticContent(data) {
+            const websetting = data.websetting;
+            if (websetting) {
+                updateTheme(document.documentElement, websetting.color, websetting.gradation);
+                document.title = `${websetting.name} - Video Transcript`;
+                document.getElementById('nav-title').textContent = websetting.name;
+                document.getElementById('footer-title').textContent = websetting.name;
+            }
+            document.getElementById('visitor-count').textContent = `${(data.transkrip?.visitor || 0).toLocaleString()} visitors`;
+        }
+        
+        function populateLanguageOptions() {
+            LANGUAGE_OPTIONS.forEach(opt => languageSelect.add(new Option(opt.label, opt.value)));
+        }
+
+        function setButtonState(loading) {
+            isLoading = loading;
+            generateBtn.disabled = loading;
+            if (loading) {
+                generateBtn.innerHTML = `<div class="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin-custom"></div> Generating Transcript...`;
+            } else {
+                generateBtn.innerHTML = `<i class="fas fa-file-alt w-4 h-4 mr-2"></i> Generate Transcript`;
+            }
+        }
+
+        function showError(message) {
+            formErrorMsg.textContent = message;
+            formError.classList.remove('hidden');
+            formError.classList.add('flex');
+            resetBtn.classList.remove('hidden');
+        }
+
+        function hideError() {
+            formError.classList.add('hidden');
+        }
+
+        function renderResult(transcript) {
+            transcriptOutput.value = transcript;
+            const lineCount = transcript.split('\n').length;
+            const charCount = transcript.length;
+            document.getElementById('transcript-stats').textContent = `${lineCount} lines • ${charCount} characters`;
+            
+            const selectedLang = LANGUAGE_OPTIONS.find(l => l.value === languageSelect.value);
+            document.getElementById('transcript-language').textContent = `Language: ${selectedLang?.label}`;
+
+            resultCard.classList.remove('hidden');
+            resetBtn.classList.remove('hidden');
+        }
+        
+        function showToast(message) {
+            toastMsg.textContent = message;
+            toastEl.classList.add('show');
+            setTimeout(() => {
+                toastEl.classList.remove('show');
+            }, 3000);
+        }
+
+        // --- EVENT HANDLERS ---
+        function handleReset() {
+            urlInput.value = '';
+            transcriptOutput.value = '';
+            hideError();
+            resultCard.classList.add('hidden');
+            resetBtn.classList.add('hidden');
+            setButtonState(false);
+        }
+
+        async function handleGenerate() {
+            const url = urlInput.value.trim();
+            handleReset();
+
+            if (!url) {
+                showError('Please enter a video URL');
+                return;
+            }
+            if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
+                showError('Please enter a valid YouTube URL');
+                return;
+            }
+
+            setButtonState(true);
+
+            // Simulate API call
+            setTimeout(() => {
+                try {
+                    const mockTranscript = `[00:00] Welcome to this amazing video tutorial
+[00:15] Today we're going to learn about artificial intelligence
+[00:30] AI has been revolutionizing many industries
+[00:45] From healthcare to transportation, AI is everywhere
+[01:00] Let's start with the basics of machine learning
+[01:15] Machine learning is a subset of artificial intelligence
+[01:30] It enables computers to learn without explicit programming
+[01:45] There are three main types of machine learning
+[02:00] Supervised learning uses labeled data
+[02:15] Unsupervised learning finds patterns in unlabeled data
+[02:30] Reinforcement learning uses rewards and penalties
+[02:45] Now let's look at some practical applications
+[03:00] Image recognition is one of the most popular uses
+[03:15] Natural language processing helps computers understand text
+[03:30] Recommendation systems suggest products or content
+[03:45] Autonomous vehicles use AI for navigation
+[04:00] That concludes our introduction to AI fundamentals
+[04:15] Thank you for watching, and see you next time!`;
+                    renderResult(mockTranscript);
+                } catch (err) {
+                    showError('Failed to generate transcript. Please try again.');
+                } finally {
+                    setButtonState(false);
+                }
+            }, 3000);
+        }
+
+        function handleCopy() {
+            const text = transcriptOutput.value;
+            if (!text) return;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Transcript copied to clipboard!');
+            }).catch(err => {
+                showToast('Failed to copy transcript.');
+                console.error('Copy failed', err);
+            });
+        }
+
+        function handleDownload() {
+            const text = transcriptOutput.value;
+            if (!text) return;
+            const element = document.createElement('a');
+            const file = new Blob([text], { type: 'text/plain' });
+            element.href = URL.createObjectURL(file);
+            element.download = 'transcript.txt';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const data = await window.firebaseMINNRAI.getWebData();
+                if (!data) throw new Error("No data received from Firebase.");
+
+                renderStaticContent(data);
+                populateLanguageOptions();
+                setButtonState(false);
+
+                // Attach Event Listeners
+                generateBtn.addEventListener('click', handleGenerate);
+                resetBtn.addEventListener('click', handleReset);
+                copyBtn.addEventListener('click', handleCopy);
+                downloadBtn.addEventListener('click', handleDownload);
+
+                loadingSpinner.style.display = 'none';
+                mainContent.style.display = 'block';
+
+            } catch (err) {
+                console.error("Initialization failed:", err);
+                pageErrorMessage.textContent = err.message;
+                errorContainer.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube to MP4 Converter</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome (for icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Google Fonts (Poppins) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --theme-primary: #3b82f6; /* Default blue */
+            --theme-secondary: #ec4899; /* Default pink */
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        /* Simple CSS Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
+        .animate-slideInUp { animation: slideInUp 0.5s ease-out forwards; }
+        .animate-spin-custom { animation: rotate 1s linear infinite; }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="min-h-screen flex items-center justify-center">
+        <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>
+    </div>
+
+    <!-- Error Message on Page Load -->
+    <div id="error-container" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 hidden">
+        <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md mx-4 text-center">
+            <h2 class="text-xl font-semibold mb-2">Error Loading Page</h2>
+            <p id="error-message" class="text-gray-600">Could not fetch data.</p>
+        </div>
+    </div>
+
+    <!-- Main Content (initially hidden) -->
+    <div id="main-content" class="hidden">
+        <div class="min-h-screen bg-gradient-to-br from-theme-secondary via-white to-theme-primary">
+            <!-- Navigation -->
+            <nav class="sticky top-0 bg-white/70 backdrop-blur-lg z-40 shadow-sm">
+                <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                    <h1 id="nav-title" class="text-xl font-bold text-gray-800">WebApp</h1>
+                    <a href="#" class="bg-gray-800 text-white px-4 py-2 rounded-full text-sm hover:bg-gray-900 transition">Get Started</a>
+                </div>
+            </nav>
+
+            <main class="container mx-auto px-4 py-8">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-8 animate-slideInUp">
+                    <div class="flex items-center space-x-4">
+                        <a href="index.html" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent">
+                            <i class="fas fa-arrow-left w-4 h-4 mr-2"></i>
+                            Back to Home
+                        </a>
+                        <div class="flex items-center space-x-2">
+                            <i class="fab fa-youtube text-2xl text-red-500"></i>
+                            <h1 class="text-3xl font-poppins font-bold text-gray-800">YouTube to MP4</h1>
+                        </div>
+                    </div>
+                    <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold space-x-1">
+                        <i class="fas fa-eye w-4 h-4"></i>
+                        <span id="visitor-count">0 visitors</span>
+                    </div>
+                </div>
+
+                <div class="max-w-2xl mx-auto">
+                    <!-- Download Form -->
+                    <div class="animate-fadeIn mb-6" style="animation-delay: 0.2s;">
+                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                            <div class="p-6 flex items-center space-x-2">
+                                <i class="fas fa-video w-5 h-5"></i>
+                                <h3 class="text-lg font-semibold">Download YouTube Video</h3>
+                            </div>
+                            <div class="p-6 pt-0 space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">YouTube URL</label>
+                                    <input id="url-input" type="url" placeholder="https://www.youtube.com/watch?v=..." class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Video Quality</label>
+                                    <select id="quality-select" class="h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"></select>
+                                </div>
+                                <div id="form-error" class="hidden items-center rounded-lg border border-red-300 bg-red-50 text-red-700 p-3 text-sm">
+                                    <i class="fas fa-exclamation-circle h-4 w-4 mr-2"></i>
+                                    <span id="form-error-msg"></span>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button id="download-btn" class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 bg-[var(--theme-primary)] text-white hover:bg-[var(--theme-primary)]/90 disabled:opacity-50"></button>
+                                    <button id="reset-btn" class="hidden inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 border border-input bg-background hover:bg-accent">Reset</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Download Result -->
+                    <div id="result-card" class="hidden animate-fadeIn">
+                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                            <div class="p-6"><h3 class="text-lg font-semibold">Download Ready</h3></div>
+                            <div class="p-6 pt-0">
+                                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                                    <img id="result-thumbnail" src="" alt="Video thumbnail" class="w-32 h-20 object-cover rounded-lg mx-auto sm:mx-0">
+                                    <div class="flex-1">
+                                        <h3 id="result-title" class="font-semibold text-lg mb-2"></h3>
+                                        <p id="result-channel" class="text-gray-600 mb-1"></p>
+                                        <p id="result-meta" class="text-sm text-gray-500 mb-4"></p>
+                                        <div class="space-y-2">
+                                            <a id="result-download-mp4" href="#" class="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 bg-[var(--theme-primary)] text-white hover:bg-[var(--theme-primary)]/90"></a>
+                                            <a id="result-download-mp3" href="#" class="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 border border-input bg-background hover:bg-accent">
+                                                <i class="fas fa-music w-4 h-4 mr-2"></i> Download Audio Only (MP3)
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quality Guide & Instructions -->
+                    <div class="space-y-6 mt-8 animate-fadeIn" style="animation-delay: 0.4s;">
+                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                            <div class="p-6"><h3 class="text-lg font-semibold">Video Quality Guide</h3></div>
+                            <div id="quality-guide" class="p-6 pt-0 space-y-3">
+                                <!-- Quality guide content will be injected here -->
+                            </div>
+                        </div>
+                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                            <div class="p-6"><h3 class="text-lg font-semibold">How to Download YouTube Videos</h3></div>
+                            <div class="p-6 pt-0">
+                                <ol class="list-decimal list-inside space-y-2 text-gray-600">
+                                    <li>Copy the YouTube video URL from your browser</li>
+                                    <li>Paste the URL in the input field above</li>
+                                    <li>Choose your preferred video quality</li>
+                                    <li>Click "Download Video" and wait for processing</li>
+                                    <li>Download your MP4 file when ready</li>
+                                </ol>
+                                <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+                                    <p class="text-sm text-blue-800">
+                                        <strong>Tip:</strong> Higher quality videos take longer to process and have larger file sizes. 720p is recommended for most uses.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="bg-gray-800 text-white py-6 mt-12">
+                <div class="container mx-auto text-center">
+                    <p>&copy; 2024 <span id="footer-title">WebApp</span>. All Rights Reserved.</p>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script type="module">
+        import './firebase-init.js';
+
+        // --- STATE & CONFIG ---
+        let isLoading = false;
+        const QUALITY_OPTIONS = [
+            { value: '360', label: '360p (Low Quality)', size: '~25 MB' },
+            { value: '480', label: '480p (Standard)', size: '~45 MB' },
+            { value: '720', label: '720p HD (Recommended)', size: '~85 MB' },
+            { value: '1080', label: '1080p Full HD', size: '~150 MB' }
+        ];
+
+        // --- DOM ELEMENTS ---
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const errorContainer = document.getElementById('error-container');
+        const pageErrorMessage = document.getElementById('error-message');
+        const mainContent = document.getElementById('main-content');
+        const urlInput = document.getElementById('url-input');
+        const qualitySelect = document.getElementById('quality-select');
+        const downloadBtn = document.getElementById('download-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const formError = document.getElementById('form-error');
+        const formErrorMsg = document.getElementById('form-error-msg');
+        const resultCard = document.getElementById('result-card');
+        const qualityGuideContainer = document.getElementById('quality-guide');
+
+        // --- UI UPDATE FUNCTIONS ---
+        function updateTheme(root, color, gradation) {
+            if (color) root.style.setProperty('--theme-primary', color);
+            if (gradation) root.style.setProperty('--theme-secondary', gradation);
+        }
+
+        function renderStaticContent(data) {
+            const websetting = data.websetting;
+            if (websetting) {
+                updateTheme(document.documentElement, websetting.color, websetting.gradation);
+                document.title = `${websetting.name} - YouTube to MP4`;
+                document.getElementById('nav-title').textContent = websetting.name;
+                document.getElementById('footer-title').textContent = websetting.name;
+            }
+            document.getElementById('visitor-count').textContent = `${(data.ytmp4?.visitor || 0).toLocaleString()} visitors`;
+        }
+        
+        function populateQualityOptions() {
+            QUALITY_OPTIONS.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt.value;
+                option.textContent = `${opt.label} (${opt.size})`;
+                qualitySelect.appendChild(option);
+            });
+            qualitySelect.value = '720'; // Set default
+        }
+
+        function renderQualityGuide() {
+            QUALITY_OPTIONS.forEach(option => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-3 border rounded-lg';
+                item.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <span class="inline-flex items-center justify-center rounded-md text-xs font-medium px-2 py-1 ${qualitySelect.value === option.value ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}">${option.value}p</span>
+                        <span class="font-medium">${option.label.split(' (')[0]}</span>
+                    </div>
+                    <span class="text-sm text-gray-500">${option.size}</span>
+                `;
+                qualityGuideContainer.appendChild(item);
+            });
+        }
+
+        function setButtonState(loading) {
+            isLoading = loading;
+            downloadBtn.disabled = loading;
+            if (loading) {
+                downloadBtn.innerHTML = `<div class="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin-custom"></div> Processing...`;
+            } else {
+                downloadBtn.innerHTML = `<i class="fas fa-download w-4 h-4 mr-2"></i> Download Video`;
+            }
+        }
+
+        function showError(message) {
+            formErrorMsg.textContent = message;
+            formError.classList.remove('hidden');
+            formError.classList.add('flex');
+            resetBtn.classList.remove('hidden');
+        }
+
+        function hideError() {
+            formError.classList.add('hidden');
+        }
+
+        function renderResult(data) {
+            document.getElementById('result-thumbnail').src = data.thumbnail;
+            document.getElementById('result-title').textContent = data.title;
+            document.getElementById('result-channel').textContent = `Channel: ${data.channel}`;
+            document.getElementById('result-meta').textContent = `Duration: ${data.duration} • Quality: ${data.quality} • Size: ${data.fileSize}`;
+            
+            const downloadLink = document.getElementById('result-download-mp4');
+            downloadLink.href = data.downloadUrl;
+            downloadLink.innerHTML = `<i class="fas fa-download w-4 h-4 mr-2"></i> Download MP4 (${data.quality})`;
+            
+            resultCard.classList.remove('hidden');
+            resetBtn.classList.remove('hidden');
+        }
+
+        // --- EVENT HANDLERS ---
+        function handleReset() {
+            urlInput.value = '';
+            hideError();
+            resultCard.classList.add('hidden');
+            resetBtn.classList.add('hidden');
+            setButtonState(false);
+        }
+
+        async function handleDownload() {
+            const url = urlInput.value.trim();
+            handleReset();
+
+            if (!url) {
+                showError('Please enter a YouTube URL');
+                return;
+            }
+            if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
+                showError('Please enter a valid YouTube URL');
+                return;
+            }
+
+            setButtonState(true);
+
+            // Simulate API call
+            setTimeout(() => {
+                try {
+                    const selectedQuality = qualitySelect.value;
+                    const qualityOption = QUALITY_OPTIONS.find(q => q.value === selectedQuality);
+                    const mockData = {
+                        title: 'Amazing Video - Must Watch!',
+                        channel: 'Video Creator',
+                        duration: '10:23',
+                        thumbnail: 'https://placehold.co/320x180/FF0000/FFFFFF?text=YouTube',
+                        quality: `${selectedQuality}p`,
+                        fileSize: qualityOption.size,
+                        downloadUrl: '#'
+                    };
+                    renderResult(mockData);
+                } catch (err) {
+                    showError('Failed to process YouTube URL. Please try again.');
+                } finally {
+                    setButtonState(false);
+                }
+            }, 2000);
+        }
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const data = await window.firebaseMINNRAI.getWebData();
+                if (!data) throw new Error("No data received from Firebase.");
+
+                renderStaticContent(data);
+                populateQualityOptions();
+                renderQualityGuide();
+                setButtonState(false);
+
+                // Attach Event Listeners
+                downloadBtn.addEventListener('click', handleDownload);
+                resetBtn.addEventListener('click', handleReset);
+                qualitySelect.addEventListener('change', () => {
+                    qualityGuideContainer.innerHTML = ''; // Clear and re-render to update highlight
+                    renderQualityGuide();
+                });
+
+                loadingSpinner.style.display = 'none';
+                mainContent.style.display = 'block';
+
+            } catch (err) {
+                console.error("Initialization failed:", err);
+                pageErrorMessage.textContent = err.message;
+                errorContainer.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

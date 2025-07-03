@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Downloader</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome (for icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Google Fonts (Poppins) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --theme-primary: #3b82f6; /* Default blue */
+            --theme-secondary: #ec4899; /* Default pink */
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        /* Custom styles for Tabs */
+        .tabs-trigger[data-state='active'] {
+            background-color: white;
+            color: #1f2937; /* gray-800 */
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        /* Simple CSS Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
+        .animate-slideInUp { animation: slideInUp 0.5s ease-out forwards; }
+        .animate-spin-custom { animation: rotate 1s linear infinite; }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="min-h-screen flex items-center justify-center">
+        <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>
+    </div>
+
+    <!-- Error Message on Page Load -->
+    <div id="error-container" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 hidden">
+        <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md mx-4 text-center">
+            <h2 class="text-xl font-semibold mb-2">Error Loading Page</h2>
+            <p id="error-message" class="text-gray-600">Could not fetch data.</p>
+        </div>
+    </div>
+
+    <!-- Main Content (initially hidden) -->
+    <div id="main-content" class="hidden">
+        <div class="min-h-screen bg-gradient-to-br from-theme-secondary via-white to-theme-primary">
+            <!-- Navigation -->
+            <nav class="sticky top-0 bg-white/70 backdrop-blur-lg z-40 shadow-sm">
+                <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                    <h1 id="nav-title" class="text-xl font-bold text-gray-800">WebApp</h1>
+                    <a href="#" class="bg-gray-800 text-white px-4 py-2 rounded-full text-sm hover:bg-gray-900 transition">Get Started</a>
+                </div>
+            </nav>
+
+            <main class="container mx-auto px-4 py-8">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-8 animate-slideInUp">
+                    <div class="flex items-center space-x-4">
+                        <a href="index.html" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent">
+                            <i class="fas fa-arrow-left w-4 h-4 mr-2"></i>
+                            Back to Home
+                        </a>
+                        <div class="flex items-center space-x-2">
+                            <i class="fab fa-spotify text-2xl text-green-500"></i>
+                            <h1 class="text-3xl font-poppins font-bold text-gray-800">Spotify Downloader</h1>
+                        </div>
+                    </div>
+                    <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold space-x-1">
+                        <i class="fas fa-eye w-4 h-4"></i>
+                        <span id="visitor-count">0 visitors</span>
+                    </div>
+                </div>
+
+                <div class="max-w-2xl mx-auto">
+                    <!-- Download Form -->
+                    <div class="animate-fadeIn mb-6" style="animation-delay: 0.2s;">
+                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                            <div class="p-6 flex items-center space-x-2">
+                                <i class="fas fa-download w-5 h-5"></i>
+                                <h3 class="text-lg font-semibold">Download Spotify Content</h3>
+                            </div>
+                            <div class="p-6 pt-0 space-y-4">
+                                <!-- Content Type Tabs -->
+                                <div id="tabs-list" class="grid w-full grid-cols-3 p-1 h-10 items-center justify-center rounded-lg bg-muted text-muted-foreground bg-gray-200">
+                                    <button data-value="track" class="tabs-trigger flex items-center justify-center space-x-1 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium" data-state="active">
+                                        <i class="fas fa-music w-4 h-4"></i><span>Track</span>
+                                    </button>
+                                    <button data-value="album" class="tabs-trigger flex items-center justify-center space-x-1 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium" data-state="inactive">
+                                        <i class="fas fa-compact-disc w-4 h-4"></i><span>Album</span>
+                                    </button>
+                                    <button data-value="playlist" class="tabs-trigger flex items-center justify-center space-x-1 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium" data-state="inactive">
+                                        <i class="fas fa-list w-4 h-4"></i><span>Playlist</span>
+                                    </button>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Spotify URL</label>
+                                    <input id="url-input" type="url" placeholder="https://open.spotify.com/track/..." class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                                </div>
+                                <div id="form-error" class="hidden items-center rounded-lg border border-red-300 bg-red-50 text-red-700 p-3 text-sm">
+                                    <i class="fas fa-exclamation-circle h-4 w-4 mr-2"></i>
+                                    <span id="form-error-msg"></span>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button id="download-btn" class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 bg-[var(--theme-primary)] text-white hover:bg-[var(--theme-primary)]/90 disabled:opacity-50"></button>
+                                    <button id="reset-btn" class="hidden inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 border border-input bg-background hover:bg-accent">Reset</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Download Result -->
+                    <div id="result-card" class="hidden animate-fadeIn">
+                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                            <div class="p-6"><h3 class="text-lg font-semibold">Download Ready</h3></div>
+                            <div id="result-content" class="p-6 pt-0">
+                                <!-- Result content will be injected here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Legal Notice & Instructions -->
+                    <div class="space-y-6 mt-6 animate-fadeIn" style="animation-delay: 0.3s;">
+                         <div class="rounded-lg border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-800 flex items-start space-x-3">
+                            <i class="fas fa-exclamation-triangle mt-1"></i>
+                            <div>
+                                <strong>Important Notice:</strong> This tool is for educational purposes only. Please respect artists' rights and use downloaded content in accordance with copyright laws.
+                            </div>
+                        </div>
+                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                            <div class="p-6"><h3 class="text-lg font-semibold">How to use Spotify Downloader</h3></div>
+                            <div class="p-6 pt-0 space-y-4">
+                                <div>
+                                    <h4 class="font-semibold mb-2">For Tracks:</h4>
+                                    <ol class="list-decimal list-inside space-y-1 text-gray-600 text-sm">
+                                        <li>Open Spotify and find the track you want</li>
+                                        <li>Click the "..." menu and select "Share" → "Copy Song Link"</li>
+                                        <li>Paste the link in the Track tab above</li>
+                                    </ol>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold mb-2">For Albums/Playlists:</h4>
+                                    <ol class="list-decimal list-inside space-y-1 text-gray-600 text-sm">
+                                        <li>Navigate to the album or playlist page</li>
+                                        <li>Use the share option to copy the link</li>
+                                        <li>Use the appropriate tab and paste the link</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="bg-gray-800 text-white py-6 mt-12">
+                <div class="container mx-auto text-center">
+                    <p>&copy; 2024 <span id="footer-title">WebApp</span>. All Rights Reserved.</p>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script type="module">
+        import './firebase-init.js';
+
+        // --- STATE & DOM ELEMENTS ---
+        let isLoading = false;
+        let contentType = 'track';
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const errorContainer = document.getElementById('error-container');
+        const pageErrorMessage = document.getElementById('error-message');
+        const mainContent = document.getElementById('main-content');
+        const urlInput = document.getElementById('url-input');
+        const downloadBtn = document.getElementById('download-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const formError = document.getElementById('form-error');
+        const formErrorMsg = document.getElementById('form-error-msg');
+        const resultCard = document.getElementById('result-card');
+        const tabsList = document.getElementById('tabs-list');
+
+        // --- UI UPDATE FUNCTIONS ---
+        function updateTheme(root, color, gradation) {
+            if (color) root.style.setProperty('--theme-primary', color);
+            if (gradation) root.style.setProperty('--theme-secondary', gradation);
+        }
+
+        function renderStaticContent(data) {
+            const websetting = data.websetting;
+            if (websetting) {
+                updateTheme(document.documentElement, websetting.color, websetting.gradation);
+                document.title = `${websetting.name} - Spotify Downloader`;
+                document.getElementById('nav-title').textContent = websetting.name;
+                document.getElementById('footer-title').textContent = websetting.name;
+            }
+            document.getElementById('visitor-count').textContent = `${(data.spotify?.visitor || 0).toLocaleString()} visitors`;
+        }
+
+        function setButtonState(loading) {
+            isLoading = loading;
+            downloadBtn.disabled = loading;
+            if (loading) {
+                downloadBtn.innerHTML = `<div class="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin-custom"></div> Processing...`;
+            } else {
+                downloadBtn.innerHTML = `<i class="fas fa-download w-4 h-4 mr-2"></i> Download`;
+            }
+        }
+
+        function showError(message) {
+            formErrorMsg.textContent = message;
+            formError.classList.remove('hidden');
+            formError.classList.add('flex');
+            resetBtn.classList.remove('hidden');
+        }
+
+        function hideError() {
+            formError.classList.add('hidden');
+        }
+
+        function renderResult(data) {
+            const contentContainer = document.getElementById('result-content');
+            const secondaryInfo = data.release_date ? `Released: ${data.release_date}` : (data.followers ? `${data.followers} followers` : '');
+            
+            contentContainer.innerHTML = `
+                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                    <img src="${data.cover}" alt="Cover art" class="w-24 h-24 object-cover rounded-lg mx-auto sm:mx-0">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold capitalize">${data.type}</span>
+                            <span class="text-sm text-gray-600">${secondaryInfo}</span>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-1">${data.title}</h3>
+                        <p class="text-gray-600 mb-2">By ${data.artist || data.creator}</p>
+                        <div class="text-sm text-gray-500 space-y-1">
+                            ${data.album ? `<p>Album: ${data.album}</p>` : ''}
+                            ${data.tracks ? `<p>Tracks: ${data.tracks}</p>` : ''}
+                            <p>Duration: ${data.duration}</p>
+                            ${data.genre ? `<p>Genre: ${data.genre}</p>` : ''}
+                            ${data.description ? `<p class="text-xs mt-2 italic">${data.description}</p>` : ''}
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 space-y-2">
+                    <a href="#" class="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 bg-[var(--theme-primary)] text-white hover:bg-[var(--theme-primary)]/90">
+                        <i class="fas fa-download w-4 h-4 mr-2"></i>
+                        Download ${data.type === 'track' ? 'Track' : data.type === 'album' ? 'Full Album' : 'All Tracks'} (MP3)
+                        ${data.quality ? ` - ${data.quality}` : ''}
+                    </a>
+                    ${data.type !== 'track' ? `
+                    <a href="#" class="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 border border-input bg-background hover:bg-accent">
+                        <i class="fas fa-download w-4 h-4 mr-2"></i>
+                        Download Individual Tracks
+                    </a>` : ''}
+                </div>
+            `;
+            
+            resultCard.classList.remove('hidden');
+            resetBtn.classList.remove('hidden');
+        }
+
+        // --- EVENT HANDLERS ---
+        function handleReset() {
+            urlInput.value = '';
+            hideError();
+            resultCard.classList.add('hidden');
+            resetBtn.classList.add('hidden');
+            setButtonState(false);
+        }
+
+        function handleTabClick(event) {
+            const clickedTab = event.target.closest('.tabs-trigger');
+            if (!clickedTab) return;
+
+            contentType = clickedTab.dataset.value;
+
+            tabsList.querySelectorAll('.tabs-trigger').forEach(tab => {
+                tab.dataset.state = tab === clickedTab ? 'active' : 'inactive';
+            });
+            
+            urlInput.placeholder = `https://open.spotify.com/${contentType}/...`;
+        }
+
+        async function handleDownload() {
+            const url = urlInput.value.trim();
+            handleReset();
+
+            if (!url) {
+                showError('Please enter a Spotify URL');
+                return;
+            }
+            if (!url.includes('spotify.com')) {
+                showError('Please enter a valid Spotify URL');
+                return;
+            }
+
+            setButtonState(true);
+
+            // Simulate API call
+            setTimeout(() => {
+                try {
+                    const mockData = {
+                        track: { type: 'track', title: 'Amazing Song Title', artist: 'Popular Artist', album: 'Best Album Ever', duration: '3:45', cover: 'https://placehold.co/300x300/1DB954/FFFFFF?text=Track', release_date: '2024', genre: 'Pop', quality: '320kbps' },
+                        album: { type: 'album', title: 'Complete Album Collection', artist: 'Famous Artist', tracks: 12, duration: '45:23', cover: 'https://placehold.co/300x300/1DB954/FFFFFF?text=Album', release_date: '2024', genre: 'Rock' },
+                        playlist: { type: 'playlist', title: 'My Awesome Playlist', creator: 'Music Lover', tracks: 25, duration: '1h 32m', cover: 'https://placehold.co/300x300/1DB954/FFFFFF?text=Playlist', followers: '15.6K', description: 'The best collection of music for every mood' }
+                    };
+                    renderResult(mockData[contentType]);
+                } catch (err) {
+                    showError('Failed to process Spotify URL. Please try again.');
+                } finally {
+                    setButtonState(false);
+                }
+            }, 2000);
+        }
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const data = await window.firebaseMINNRAI.getWebData();
+                if (!data) throw new Error("No data received from Firebase.");
+
+                renderStaticContent(data);
+                setButtonState(false);
+
+                // Attach Event Listeners
+                downloadBtn.addEventListener('click', handleDownload);
+                resetBtn.addEventListener('click', handleReset);
+                tabsList.addEventListener('click', handleTabClick);
+
+                loadingSpinner.style.display = 'none';
+                mainContent.style.display = 'block';
+
+            } catch (err) {
+                console.error("Initialization failed:", err);
+                pageErrorMessage.textContent = err.message;
+                errorContainer.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading...</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome (for icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Google Fonts (Poppins) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom styles and theme variables */
+        :root {
+            --theme-primary: #3b82f6; /* Default blue */
+            --theme-secondary: #ec4899; /* Default pink */
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        /* Gradient text utility */
+        .bg-clip-text {
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+        
+        /* Simple CSS Animations to replace Framer Motion */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .animate-fadeIn { animation: fadeIn 1s ease-in-out forwards; }
+        .animate-slideInUp { animation: slideInUp 0.8s ease-out forwards; }
+        .animate-scaleIn { animation: scaleIn 0.5s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="min-h-screen flex items-center justify-center">
+        <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-container" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 hidden">
+        <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md mx-4 text-center">
+            <div class="text-red-500 text-4xl mb-4">⚠️</div>
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">Connection Error</h2>
+            <p id="error-message" class="text-gray-600">Could not fetch data from the server.</p>
+        </div>
+    </div>
+
+    <!-- Main Content (initially hidden) -->
+    <div id="main-content" class="hidden">
+        <!-- Welcome Overlay -->
+        <div id="welcome-overlay" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+            <div class="bg-white rounded-2xl shadow-xl text-center p-8 max-w-sm w-full animate-scaleIn">
+                <img id="welcome-char" src="https://placehold.co/150x150/E2E8F0/A0AEC0?text=Char" alt="Karakter Anime" class="w-32 h-32 rounded-full mx-auto -mt-20 border-4 border-white shadow-lg">
+                <p id="welcome-text" class="text-gray-700 my-4 text-lg font-semibold">Selamat Datang!</p>
+                <button id="close-welcome" class="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition-colors">
+                    Lanjutkan
+                </button>
+            </div>
+        </div>
+
+        <div id="app-container" class="min-h-screen bg-gradient-to-br from-theme-secondary via-white to-theme-primary">
+            <!-- Navigation -->
+            <nav class="sticky top-0 bg-white/70 backdrop-blur-lg z-40 shadow-sm">
+                <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                    <h1 id="nav-title" class="text-xl font-bold text-gray-800">WebApp</h1>
+                    <a href="#" class="bg-gray-800 text-white px-4 py-2 rounded-full text-sm hover:bg-gray-900 transition">Get Started</a>
+                </div>
+            </nav>
+
+            <!-- Main -->
+            <main class="container mx-auto px-4 py-8 animate-fadeIn" style="animation-delay: 0.5s;">
+                <!-- Hero Section -->
+                <section class="text-center mb-12 animate-slideInUp" style="animation-delay: 0.2s;">
+                    <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+                        Welcome to
+                        <span id="hero-title" class="bg-gradient-to-r from-theme-primary to-pink-500 bg-clip-text text-transparent">
+                            WebApp
+                        </span>
+                    </h2>
+                    <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                        Your ultimate destination for anime streaming, social media tools, and AI-powered entertainment
+                    </p>
+                </section>
+
+                <!-- Features Grid -->
+                <section class="mb-12 animate-slideInUp" style="animation-delay: 0.4s;">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-8 text-center">
+                        Available Features
+                    </h3>
+                    <div id="features-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <!-- Feature cards will be injected here by JavaScript -->
+                    </div>
+                </section>
+
+                <!-- Stats Section -->
+                <section class="bg-white/50 backdrop-blur-sm rounded-3xl p-8 mb-12 animate-slideInUp" style="animation-delay: 0.6s;">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
+                        Platform Statistics
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <div class="text-center">
+                            <div id="stats-total-visitors" class="text-3xl font-bold text-theme-primary mb-2">0</div>
+                            <div class="text-sm text-gray-600">Total Visitors</div>
+                        </div>
+                        <div class="text-center">
+                            <div id="stats-active-features" class="text-3xl font-bold text-pink-500 mb-2">0</div>
+                            <div class="text-sm text-gray-600">Active Features</div>
+                        </div>
+                        <div class="text-center">
+                            <div id="stats-anime-series" class="text-3xl font-bold text-theme-primary mb-2">0</div>
+                            <div class="text-sm text-gray-600">Anime Series</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-pink-500 mb-2">24/7</div>
+                            <div class="text-sm text-gray-600">Uptime</div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <!-- Footer -->
+            <footer class="bg-gray-800 text-white py-6">
+                <div class="container mx-auto text-center">
+                    <p>&copy; 2024 <span id="footer-title">WebApp</span>. All Rights Reserved.</p>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Firebase Init and Main App Logic -->
+    <script type="module">
+        import './firebase-init.js';
+
+        // --- DATA AND CONFIGURATION ---
+        const ALL_FEATURES = [
+            { key: 'anime', title: 'Anime Streaming', description: 'Watch your favorite anime series with high quality streaming', gradientFrom: 'from-pink-500', gradientTo: 'to-purple-600', iconComponent: `<span>🎌</span>` },
+            { key: 'tiktok', title: 'TikTok Downloader', description: 'Download TikTok videos without watermark', gradientFrom: 'from-gray-800', gradientTo: 'to-gray-600', iconComponent: `<i class="fab fa-tiktok"></i>` },
+            { key: 'instagram', title: 'Instagram Downloader', description: 'Save Instagram photos, videos, and stories', gradientFrom: 'from-pink-500', gradientTo: 'to-purple-600', iconComponent: `<i class="fab fa-instagram"></i>` },
+            { key: 'ytmp3', title: 'YouTube to MP3', description: 'Convert YouTube videos to high-quality MP3', gradientFrom: 'from-red-500', gradientTo: 'to-red-700', iconComponent: `<i class="fas fa-music"></i>` },
+            { key: 'ytmp4', title: 'YouTube to MP4', description: 'Download YouTube videos in various qualities', gradientFrom: 'from-red-600', gradientTo: 'to-red-800', iconComponent: `<i class="fas fa-video"></i>` },
+            { key: 'transkrip', title: 'Video Transcript', description: 'Generate transcripts from video content', gradientFrom: 'from-blue-500', gradientTo: 'to-blue-700', iconComponent: `<i class="fas fa-file-alt"></i>` },
+            { key: 'twitter', title: 'Twitter Downloader', description: 'Download Twitter videos and GIFs', gradientFrom: 'from-blue-400', gradientTo: 'to-blue-600', iconComponent: `<i class="fab fa-twitter"></i>` },
+            { key: 'ai', title: 'AI Assistant', description: 'AI-powered tools for various tasks', gradientFrom: 'from-blue-500', gradientTo: 'to-purple-600', iconComponent: `<i class="fas fa-robot"></i>` },
+            { key: 'douyin', title: 'Douyin Downloader', description: 'Download Douyin videos easily', gradientFrom: 'from-gray-800', gradientTo: 'to-gray-600', iconComponent: `<span>🎵</span>` },
+            { key: 'facebook', title: 'Facebook Downloader', description: 'Save Facebook videos and photos', gradientFrom: 'from-blue-600', gradientTo: 'to-blue-800', iconComponent: `<i class="fab fa-facebook"></i>` },
+            { key: 'pinterest', title: 'Pinterest Downloader', description: 'Download Pinterest images and videos', gradientFrom: 'from-red-500', gradientTo: 'to-pink-500', iconComponent: `<i class="fab fa-pinterest"></i>` },
+            { key: 'rednote', title: 'RedNote Downloader', description: 'Download RedNote content', gradientFrom: 'from-red-600', gradientTo: 'to-red-800', iconComponent: `<span>📝</span>` },
+            { key: 'spotify', title: 'Spotify Downloader', description: 'Download Spotify tracks and playlists', gradientFrom: 'from-green-500', gradientTo: 'to-green-700', iconComponent: `<i class="fab fa-spotify"></i>` },
+            { key: 'imagecreation', title: 'AI Image Creator', description: 'Generate images using AI technology', gradientFrom: 'from-purple-500', gradientTo: 'to-pink-500', iconComponent: `<i class="fas fa-image"></i>` }
+        ];
+
+        // --- DOM ELEMENTS ---
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const errorContainer = document.getElementById('error-container');
+        const errorMessage = document.getElementById('error-message');
+        const mainContent = document.getElementById('main-content');
+
+        // --- HELPER FUNCTIONS ---
+
+        /**
+         * Updates the CSS theme variables
+         * @param {HTMLElement} root - The root element (document.documentElement)
+         * @param {string} color - The primary color hex
+         * @param {string} gradation - The secondary color hex
+         */
+        function updateTheme(root, color, gradation) {
+            if (color) root.style.setProperty('--theme-primary', color);
+            if (gradation) root.style.setProperty('--theme-secondary', gradation);
+        }
+
+        /**
+         * Creates the HTML for a single feature card
+         * @param {object} feature - The feature's static data (title, desc, etc.)
+         * @param {object} featureData - The feature's dynamic data from Firebase (icon, visitor)
+         * @returns {string} - The HTML string for the card
+         */
+        function createFeatureCardHTML(feature, featureData) {
+            const iconHTML = featureData?.icon ? `<img src="${featureData.icon}" class="w-12 h-12 mx-auto mb-4" alt="${feature.title}">` : `<div class="text-5xl mb-4">${feature.iconComponent}</div>`;
+            
+            return `
+                <div class="feature-card bg-gradient-to-br ${feature.gradientFrom} ${feature.gradientTo} p-6 rounded-2xl text-white shadow-lg cursor-pointer transform hover:-translate-y-2 transition-transform duration-300 animate-scaleIn" data-feature-key="${feature.key}">
+                    <div class="flex items-center justify-center h-16">
+                        ${iconHTML}
+                    </div>
+                    <h4 class="text-xl font-bold mb-2 mt-4">${feature.title}</h4>
+                    <p class="text-sm opacity-90 mb-4">${feature.description}</p>
+                    <div class="flex items-center justify-center text-xs bg-white/20 rounded-full px-3 py-1">
+                        <i class="fas fa-users mr-2"></i>
+                        <span>${(featureData?.visitor || 0).toLocaleString()} visitors</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        /**
+         * Handles clicking on a feature card
+         * @param {string} featureKey - The key of the clicked feature (e.g., 'anime')
+         */
+        async function handleFeatureClick(featureKey) {
+            try {
+                await window.firebaseMINNRAI.tambahVisitor(featureKey);
+                window.location.href = `/${featureKey}`;
+            } catch (err) {
+                console.error("Failed to update visitor count:", err);
+                // Still navigate even if the visitor count fails
+                window.location.href = `/${featureKey}`;
+            }
+        }
+
+        // --- MAIN APPLICATION LOGIC ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const data = await window.firebaseMINNRAI.getWebData();
+                if (!data) {
+                    throw new Error("No data received from Firebase.");
+                }
+
+                // --- Hide loader, show content ---
+                loadingSpinner.style.display = 'none';
+                mainContent.style.display = 'block';
+                
+                // --- Apply Theme ---
+                if (data.websetting) {
+                    updateTheme(document.documentElement, data.websetting.color, data.websetting.gradation);
+                    document.title = data.websetting.name || 'WebApp';
+                }
+
+                // --- Welcome Overlay Logic ---
+                const welcomeOverlay = document.getElementById('welcome-overlay');
+                if (data.sambutandatang) {
+                    document.getElementById('welcome-char').src = data.sambutandatang.karakteranime;
+                    document.getElementById('welcome-text').textContent = data.sambutandatang.katasambutan;
+                    welcomeOverlay.classList.remove('hidden');
+
+                    if (data.sambutandatang.soundsambutan) {
+                        const audio = new Audio(data.sambutandatang.soundsambutan);
+                        // Play after a small delay to ensure user interaction is possible
+                        setTimeout(() => audio.play().catch(e => console.warn("Audio play failed:", e)), 100);
+                    }
+
+                    document.getElementById('close-welcome').addEventListener('click', () => {
+                        welcomeOverlay.classList.add('hidden');
+                        document.getElementById('app-container').style.opacity = 1;
+                    });
+                } else {
+                     document.getElementById('app-container').style.opacity = 1;
+                }
+
+                // --- Populate Navigation, Hero, and Footer ---
+                if (data.websetting) {
+                    document.getElementById('nav-title').textContent = data.websetting.name;
+                    document.getElementById('hero-title').textContent = data.websetting.name;
+                    document.getElementById('footer-title').textContent = data.websetting.name;
+                }
+
+                // --- Render Features ---
+                const featuresGrid = document.getElementById('features-grid');
+                const activeFeatures = ALL_FEATURES.filter(feature => {
+                    const featureData = data[feature.key];
+                    return featureData && featureData.aktif === 'true';
+                });
+
+                let totalVisitors = 0;
+                featuresGrid.innerHTML = ''; // Clear any placeholders
+                activeFeatures.forEach((feature, index) => {
+                    const featureData = data[feature.key];
+                    totalVisitors += (featureData?.visitor || 0);
+                    const cardHTML = createFeatureCardHTML(feature, featureData);
+                    const cardWrapper = document.createElement('div');
+                    cardWrapper.innerHTML = cardHTML;
+                    // Add animation delay dynamically
+                    cardWrapper.firstElementChild.style.animationDelay = `${0.1 * index}s`;
+                    featuresGrid.appendChild(cardWrapper.firstElementChild);
+                });
+                
+                // Add event listener to the grid for delegation
+                featuresGrid.addEventListener('click', (event) => {
+                    const card = event.target.closest('.feature-card');
+                    if (card && card.dataset.featureKey) {
+                        handleFeatureClick(card.dataset.featureKey);
+                    }
+                });
+
+                // --- Populate Stats ---
+                document.getElementById('stats-total-visitors').textContent = totalVisitors.toLocaleString();
+                document.getElementById('stats-active-features').textContent = activeFeatures.length;
+                const animeSeriesCount = data.anime ? Object.keys(data.anime).filter(key => !isNaN(Number(key))).length : 0;
+                document.getElementById('stats-anime-series').textContent = animeSeriesCount;
+
+            } catch (error) {
+                console.error("Initialization failed:", error);
+                loadingSpinner.style.display = 'none';
+                errorMessage.textContent = error.message;
+                errorContainer.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

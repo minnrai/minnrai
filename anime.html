@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anime Streaming</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome (for icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Google Fonts (Poppins) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --theme-primary: #3b82f6; /* Default blue */
+            --theme-secondary: #ec4899; /* Default pink */
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        /* Simple CSS Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
+        .animate-slideInUp { animation: slideInUp 0.5s ease-out forwards; }
+        .animate-scaleIn { animation: scaleIn 0.5s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="min-h-screen flex items-center justify-center">
+        <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-container" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 hidden">
+        <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md mx-4 text-center">
+            <div class="text-red-500 text-4xl mb-4">⚠️</div>
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">Error Loading Anime Data</h2>
+            <p id="error-message" class="text-gray-600">Could not fetch data from the server.</p>
+        </div>
+    </div>
+
+    <!-- Main Content (initially hidden) -->
+    <div id="main-content" class="hidden">
+        <div class="min-h-screen bg-gradient-to-br from-theme-secondary via-white to-theme-primary">
+            <!-- Navigation -->
+            <nav class="sticky top-0 bg-white/70 backdrop-blur-lg z-40 shadow-sm">
+                <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                    <h1 id="nav-title" class="text-xl font-bold text-gray-800">WebApp</h1>
+                    <a href="#" class="bg-gray-800 text-white px-4 py-2 rounded-full text-sm hover:bg-gray-900 transition">Get Started</a>
+                </div>
+            </nav>
+
+            <main class="container mx-auto px-4 py-8">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-8 animate-slideInUp">
+                    <div class="flex items-center space-x-4">
+                        <a href="index.html" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3">
+                            <i class="fas fa-arrow-left w-4 h-4 mr-2"></i>
+                            Back to Home
+                        </a>
+                        <div class="flex items-center space-x-2">
+                            <img id="header-icon" src="https://placehold.co/32x32" alt="Anime Icon" class="w-8 h-8 rounded">
+                            <h1 class="text-3xl font-poppins font-bold text-gray-800">Anime Streaming</h1>
+                        </div>
+                    </div>
+                    <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 space-x-1">
+                        <i class="fas fa-eye w-4 h-4"></i>
+                        <span id="visitor-count">0 visitors</span>
+                    </div>
+                </div>
+
+                <!-- Anime List View -->
+                <div id="anime-list-view" class="animate-fadeIn">
+                    <div id="anime-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <!-- Anime cards will be injected here -->
+                    </div>
+                </div>
+
+                <!-- Episode Player View -->
+                <div id="episode-player-view" class="hidden animate-fadeIn">
+                    <button id="back-to-list-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mb-6">
+                        <i class="fas fa-arrow-left w-4 h-4 mr-2"></i>
+                        Back to Anime List
+                    </button>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Video Player -->
+                        <div class="lg:col-span-2">
+                            <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                                <div class="flex flex-col space-y-1.5 p-6">
+                                    <h3 id="player-title" class="text-2xl font-semibold leading-none tracking-tight flex items-center space-x-2">
+                                        <span>Anime Title</span>
+                                    </h3>
+                                </div>
+                                <div id="video-player-container" class="p-6 pt-0">
+                                    <!-- Player or placeholder will be injected here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Episode List & Info -->
+                        <div class="space-y-4">
+                            <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                                <div class="flex flex-col space-y-1.5 p-6">
+                                    <h3 class="text-2xl font-semibold leading-none tracking-tight">Episodes</h3>
+                                </div>
+                                <div id="episode-list-container" class="p-6 pt-0 space-y-2 max-h-96 overflow-y-auto">
+                                    <!-- Episode buttons will be injected here -->
+                                </div>
+                            </div>
+                            <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                                <div class="flex flex-col space-y-1.5 p-6">
+                                    <h3 class="text-2xl font-semibold leading-none tracking-tight">Anime Info</h3>
+                                </div>
+                                <div id="anime-info-container" class="p-6 pt-0">
+                                    <!-- Anime info will be injected here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="bg-gray-800 text-white py-6 mt-12">
+                <div class="container mx-auto text-center">
+                    <p>&copy; 2024 <span id="footer-title">WebApp</span>. All Rights Reserved.</p>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script type="module">
+        import './firebase-init.js';
+
+        // --- STATE VARIABLES ---
+        let fullData = null;
+        let animeList = [];
+        let selectedAnimeId = null;
+        let selectedEpisodeKey = null;
+
+        // --- DOM ELEMENTS ---
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const errorContainer = document.getElementById('error-container');
+        const errorMessage = document.getElementById('error-message');
+        const mainContent = document.getElementById('main-content');
+        const animeListView = document.getElementById('anime-list-view');
+        const episodePlayerView = document.getElementById('episode-player-view');
+        const animeGrid = document.getElementById('anime-grid');
+        const backToListBtn = document.getElementById('back-to-list-btn');
+
+        // --- RENDER FUNCTIONS ---
+
+        function updateTheme(root, color, gradation) {
+            if (color) root.style.setProperty('--theme-primary', color);
+            if (gradation) root.style.setProperty('--theme-secondary', gradation);
+        }
+
+        function renderStaticContent(data) {
+            const websetting = data.websetting;
+            if (websetting) {
+                updateTheme(document.documentElement, websetting.color, websetting.gradation);
+                document.title = `${websetting.name} - Anime`;
+                document.getElementById('nav-title').textContent = websetting.name;
+                document.getElementById('footer-title').textContent = websetting.name;
+            }
+            const animeData = data.anime;
+            if (animeData) {
+                document.getElementById('header-icon').src = animeData.icon || 'https://placehold.co/32x32';
+                document.getElementById('visitor-count').textContent = `${(animeData.visitor || 0).toLocaleString()} visitors`;
+            }
+        }
+
+        function renderAnimeList() {
+            animeGrid.innerHTML = ''; // Clear previous content
+            animeList.forEach((anime, index) => {
+                const episodeCount = Object.keys(anime.episode || {}).length;
+                const card = document.createElement('div');
+                card.className = "rounded-lg border bg-card text-card-foreground shadow-sm cursor-pointer hover:shadow-lg transition-all duration-300 group hover:-translate-y-1 animate-scaleIn";
+                card.style.animationDelay = `${index * 0.05}s`;
+                card.dataset.animeId = anime.id;
+                card.innerHTML = `
+                    <div class="relative overflow-hidden rounded-t-lg">
+                        <img src="${anime.poster}" alt="${anime.judul}" class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300"></div>
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <h3 class="text-white font-semibold text-lg leading-tight drop-shadow-lg">${anime.judul}</h3>
+                        </div>
+                    </div>
+                    <div class="p-4 flex items-center justify-between">
+                        <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">${episodeCount} Episodes</div>
+                        <button class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium h-9 px-3 rounded-md bg-[var(--theme-primary)] text-white hover:bg-[var(--theme-primary)]/90">
+                            <i class="fas fa-play w-4 h-4 mr-1"></i> Watch
+                        </button>
+                    </div>
+                `;
+                animeGrid.appendChild(card);
+            });
+        }
+        
+        function renderEpisodePlayer() {
+            const anime = animeList.find(a => a.id === selectedAnimeId);
+            if (!anime) return;
+
+            // Render Player Title
+            document.getElementById('player-title').innerHTML = `<span>${anime.judul}</span>`;
+
+            // Render Anime Info
+            document.getElementById('anime-info-container').innerHTML = `
+                <img src="${anime.poster}" alt="${anime.judul}" class="w-full rounded-lg mb-4">
+                <h3 class="font-semibold text-lg mb-2">${anime.judul}</h3>
+                <p class="text-sm text-gray-600">Total Episodes: ${Object.keys(anime.episode || {}).length}</p>
+            `;
+
+            // Render Episode List
+            const episodeListContainer = document.getElementById('episode-list-container');
+            episodeListContainer.innerHTML = '';
+            if (anime.episode) {
+                Object.keys(anime.episode).forEach(key => {
+                    const button = document.createElement('button');
+                    button.dataset.episodeKey = key;
+                    button.className = "episode-button w-full justify-start inline-flex items-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground";
+                    button.innerHTML = `<i class="fas fa-play w-4 h-4 mr-2"></i> Episode ${key.replace('eps', '')}`;
+                    episodeListContainer.appendChild(button);
+                });
+            }
+            
+            // Set initial player state
+            updateVideoPlayer();
+        }
+
+        function updateVideoPlayer() {
+            const anime = animeList.find(a => a.id === selectedAnimeId);
+            const playerContainer = document.getElementById('video-player-container');
+            
+            if (selectedEpisodeKey && anime && anime.episode[selectedEpisodeKey]) {
+                playerContainer.innerHTML = `
+                    <div class="aspect-video bg-black rounded-lg overflow-hidden">
+                        <video controls autoplay class="w-full h-full" poster="${anime.poster}">
+                            <source src="${anime.episode[selectedEpisodeKey]}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                `;
+                // Update title with episode number
+                document.getElementById('player-title').innerHTML = `
+                    <span>${anime.judul}</span>
+                    <div class="ml-2 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">${'Episode ' + selectedEpisodeKey.replace('eps', '')}</div>
+                `;
+            } else {
+                playerContainer.innerHTML = `
+                    <div class="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
+                        <div class="text-center">
+                            <i class="fas fa-play-circle text-6xl text-gray-400 mb-4"></i>
+                            <p class="text-gray-600">Select an episode to start watching</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Highlight selected episode button
+            document.querySelectorAll('.episode-button').forEach(btn => {
+                if (btn.dataset.episodeKey === selectedEpisodeKey) {
+                    btn.classList.remove('border', 'border-input', 'bg-background', 'hover:bg-accent');
+                    btn.classList.add('bg-[var(--theme-primary)]', 'text-white', 'hover:bg-[var(--theme-primary)]/90');
+                } else {
+                    btn.classList.add('border', 'border-input', 'bg-background', 'hover:bg-accent');
+                    btn.classList.remove('bg-[var(--theme-primary)]', 'text-white', 'hover:bg-[var(--theme-primary)]/90');
+                }
+            });
+        }
+
+
+        // --- VIEW SWITCHING LOGIC ---
+
+        function showAnimeList() {
+            selectedAnimeId = null;
+            selectedEpisodeKey = null;
+            episodePlayerView.classList.add('hidden');
+            animeListView.classList.remove('hidden');
+        }
+
+        function showEpisodePlayer(animeId) {
+            selectedAnimeId = animeId;
+            selectedEpisodeKey = null; // Reset episode on new anime selection
+            animeListView.classList.add('hidden');
+            episodePlayerView.classList.remove('hidden');
+            renderEpisodePlayer();
+        }
+
+        // --- EVENT HANDLERS ---
+        
+        function handleGridClick(event) {
+            const card = event.target.closest('[data-anime-id]');
+            if (card) {
+                const animeId = card.dataset.animeId;
+                showEpisodePlayer(animeId);
+            }
+        }
+
+        function handleEpisodeClick(event) {
+            const button = event.target.closest('.episode-button');
+            if (button) {
+                selectedEpisodeKey = button.dataset.episodeKey;
+                updateVideoPlayer();
+            }
+        }
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                fullData = await window.firebaseMINNRAI.getWebData();
+                if (!fullData || !fullData.anime) {
+                    throw new Error("Anime data is not available.");
+                }
+
+                // Process data
+                const animeData = fullData.anime;
+                animeList = Object.keys(animeData)
+                    .filter(key => !isNaN(Number(key))) // Filter for numeric keys which represent anime entries
+                    .map(key => ({ id: key, ...animeData[key] }));
+
+                // Initial Render
+                renderStaticContent(fullData);
+                renderAnimeList();
+
+                // Attach Event Listeners
+                animeGrid.addEventListener('click', handleGridClick);
+                backToListBtn.addEventListener('click', showAnimeList);
+                document.getElementById('episode-list-container').addEventListener('click', handleEpisodeClick);
+
+                // Show content
+                loadingSpinner.style.display = 'none';
+                mainContent.style.display = 'block';
+
+            } catch (error) {
+                console.error("Initialization failed:", error);
+                loadingSpinner.style.display = 'none';
+                errorMessage.textContent = error.message;
+                errorContainer.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
