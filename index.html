@@ -19,8 +19,8 @@
     <style>
         /* Custom styles and theme variables */
         :root {
-            --theme-primary: #3b82f6; /* Default blue */
-            --theme-secondary: #ec4899; /* Default pink */
+            --theme-primary: #FFA6B8; /* Default from your DB */
+            --theme-secondary: #FDE5F2; /* Default from your DB */
         }
         body {
             font-family: 'Poppins', sans-serif;
@@ -31,30 +31,38 @@
             background-clip: text;
         }
         
-        /* Simple CSS Animations to replace Framer Motion */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes scaleIn {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        @keyframes heart-beat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
         }
 
         .animate-fadeIn { animation: fadeIn 1s ease-in-out forwards; }
         .animate-slideInUp { animation: slideInUp 0.8s ease-out forwards; }
         .animate-scaleIn { animation: scaleIn 0.5s ease-out forwards; }
+        .animate-heart-beat { animation: heart-beat 1.2s infinite ease-in-out; }
     </style>
 </head>
 <body class="bg-gray-50">
 
     <!-- Loading Spinner -->
-    <div id="loading-spinner" class="min-h-screen flex items-center justify-center">
-        <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>
+    <div id="loading-spinner" class="min-h-screen flex items-center justify-center bg-white">
+        <div class="animate-heart-beat">
+            <svg class="w-20 h-20 text-pink-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
+        </div>
+    </div>
+
+    <!-- Maintenance Page (Initially hidden) -->
+    <div id="maintenance-page" class="hidden min-h-screen w-full flex items-center justify-center bg-gray-100 p-4">
+        <div class="text-center">
+            <img id="maintenance-char" src="" alt="Maintenance Character" class="w-48 h-48 mx-auto mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Under Maintenance</h1>
+            <p id="maintenance-text" class="text-gray-600 max-w-md mx-auto"></p>
+        </div>
     </div>
 
     <!-- Error Message -->
@@ -71,20 +79,22 @@
         <!-- Welcome Overlay -->
         <div id="welcome-overlay" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
             <div class="bg-white rounded-2xl shadow-xl text-center p-8 max-w-sm w-full animate-scaleIn">
-                <img id="welcome-char" src="https://placehold.co/150x150/E2E8F0/A0AEC0?text=Char" alt="Karakter Anime" class="w-32 h-32 rounded-full mx-auto -mt-20 border-4 border-white shadow-lg">
-                <p id="welcome-text" class="text-gray-700 my-4 text-lg font-semibold">Selamat Datang!</p>
-                <button id="close-welcome" class="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition-colors">
+                <img id="welcome-char" src="" alt="Karakter Anime" class="w-32 h-32 rounded-full mx-auto -mt-20 border-4 border-white shadow-lg">
+                <p id="welcome-text" class="text-gray-700 my-4 text-lg font-semibold"></p>
+                <button id="close-welcome" class="text-white px-6 py-2 rounded-full transition-colors" style="background-color: var(--theme-primary);">
                     Lanjutkan
                 </button>
             </div>
         </div>
 
-        <div id="app-container" class="min-h-screen bg-gradient-to-br from-theme-secondary via-white to-theme-primary">
+        <div id="app-container" class="min-h-screen bg-gradient-to-br from-[var(--theme-secondary)] via-white to-[var(--theme-primary)]">
             <!-- Navigation -->
             <nav class="sticky top-0 bg-white/70 backdrop-blur-lg z-40 shadow-sm">
                 <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-                    <h1 id="nav-title" class="text-xl font-bold text-gray-800">WebApp</h1>
-                    <a href="#" class="bg-gray-800 text-white px-4 py-2 rounded-full text-sm hover:bg-gray-900 transition">Get Started</a>
+                    <div class="flex items-center space-x-3">
+                        <img id="nav-icon" src="" alt="Icon" class="w-8 h-8 rounded-full">
+                        <h1 id="nav-title" class="text-xl font-bold text-gray-800"></h1>
+                    </div>
                 </div>
             </nav>
 
@@ -94,8 +104,7 @@
                 <section class="text-center mb-12 animate-slideInUp" style="animation-delay: 0.2s;">
                     <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
                         Welcome to
-                        <span id="hero-title" class="bg-gradient-to-r from-theme-primary to-pink-500 bg-clip-text text-transparent">
-                            WebApp
+                        <span id="hero-title" class="bg-gradient-to-r from-[var(--theme-primary)] to-pink-500 bg-clip-text text-transparent">
                         </span>
                     </h2>
                     <p class="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -120,7 +129,7 @@
                     </h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                         <div class="text-center">
-                            <div id="stats-total-visitors" class="text-3xl font-bold text-theme-primary mb-2">0</div>
+                            <div id="stats-total-visitors" class="text-3xl font-bold text-theme-primary mb-2" style="color: var(--theme-primary);">0</div>
                             <div class="text-sm text-gray-600">Total Visitors</div>
                         </div>
                         <div class="text-center">
@@ -128,7 +137,7 @@
                             <div class="text-sm text-gray-600">Active Features</div>
                         </div>
                         <div class="text-center">
-                            <div id="stats-anime-series" class="text-3xl font-bold text-theme-primary mb-2">0</div>
+                            <div id="stats-anime-series" class="text-3xl font-bold text-theme-primary mb-2" style="color: var(--theme-primary);">0</div>
                             <div class="text-sm text-gray-600">Anime Series</div>
                         </div>
                         <div class="text-center">
@@ -142,7 +151,7 @@
             <!-- Footer -->
             <footer class="bg-gray-800 text-white py-6">
                 <div class="container mx-auto text-center">
-                    <p>&copy; 2024 <span id="footer-title">WebApp</span>. All Rights Reserved.</p>
+                    <p id="footer-text"></p>
                 </div>
             </footer>
         </div>
@@ -152,161 +161,128 @@
     <script type="module">
         import './firebase-init.js';
 
-        // --- DATA AND CONFIGURATION ---
-        const ALL_FEATURES = [
-            { key: 'anime', title: 'Anime Streaming', description: 'Watch your favorite anime series with high quality streaming', gradientFrom: 'from-pink-500', gradientTo: 'to-purple-600', iconComponent: `<span>🎌</span>` },
-            { key: 'tiktok', title: 'TikTok Downloader', description: 'Download TikTok videos without watermark', gradientFrom: 'from-gray-800', gradientTo: 'to-gray-600', iconComponent: `<i class="fab fa-tiktok"></i>` },
-            { key: 'instagram', title: 'Instagram Downloader', description: 'Save Instagram photos, videos, and stories', gradientFrom: 'from-pink-500', gradientTo: 'to-purple-600', iconComponent: `<i class="fab fa-instagram"></i>` },
-            { key: 'ytmp3', title: 'YouTube to MP3', description: 'Convert YouTube videos to high-quality MP3', gradientFrom: 'from-red-500', gradientTo: 'to-red-700', iconComponent: `<i class="fas fa-music"></i>` },
-            { key: 'ytmp4', title: 'YouTube to MP4', description: 'Download YouTube videos in various qualities', gradientFrom: 'from-red-600', gradientTo: 'to-red-800', iconComponent: `<i class="fas fa-video"></i>` },
-            { key: 'transkrip', title: 'Video Transcript', description: 'Generate transcripts from video content', gradientFrom: 'from-blue-500', gradientTo: 'to-blue-700', iconComponent: `<i class="fas fa-file-alt"></i>` },
-            { key: 'twitter', title: 'Twitter Downloader', description: 'Download Twitter videos and GIFs', gradientFrom: 'from-blue-400', gradientTo: 'to-blue-600', iconComponent: `<i class="fab fa-twitter"></i>` },
-            { key: 'ai', title: 'AI Assistant', description: 'AI-powered tools for various tasks', gradientFrom: 'from-blue-500', gradientTo: 'to-purple-600', iconComponent: `<i class="fas fa-robot"></i>` },
-            { key: 'douyin', title: 'Douyin Downloader', description: 'Download Douyin videos easily', gradientFrom: 'from-gray-800', gradientTo: 'to-gray-600', iconComponent: `<span>🎵</span>` },
-            { key: 'facebook', title: 'Facebook Downloader', description: 'Save Facebook videos and photos', gradientFrom: 'from-blue-600', gradientTo: 'to-blue-800', iconComponent: `<i class="fab fa-facebook"></i>` },
-            { key: 'pinterest', title: 'Pinterest Downloader', description: 'Download Pinterest images and videos', gradientFrom: 'from-red-500', gradientTo: 'to-pink-500', iconComponent: `<i class="fab fa-pinterest"></i>` },
-            { key: 'rednote', title: 'RedNote Downloader', description: 'Download RedNote content', gradientFrom: 'from-red-600', gradientTo: 'to-red-800', iconComponent: `<span>📝</span>` },
-            { key: 'spotify', title: 'Spotify Downloader', description: 'Download Spotify tracks and playlists', gradientFrom: 'from-green-500', gradientTo: 'to-green-700', iconComponent: `<i class="fab fa-spotify"></i>` },
-            { key: 'imagecreation', title: 'AI Image Creator', description: 'Generate images using AI technology', gradientFrom: 'from-purple-500', gradientTo: 'to-pink-500', iconComponent: `<i class="fas fa-image"></i>` }
-        ];
+        // --- STATIC FEATURE CONFIGURATION ---
+        // This object maps feature keys to their display properties.
+        const FEATURE_CONFIG = {
+            anime: { title: 'Anime Streaming', description: 'Watch your favorite anime series', gradient: 'from-pink-500 to-purple-600' },
+            tiktok: { title: 'TikTok Downloader', description: 'Download TikTok videos without watermark', gradient: 'from-gray-800 to-gray-600' },
+            instagram: { title: 'Instagram Downloader', description: 'Save Instagram photos and videos', gradient: 'from-pink-500 to-purple-600' },
+            ytmp3: { title: 'YouTube to MP3', description: 'Convert YouTube videos to MP3', gradient: 'from-red-500 to-red-700' },
+            ytmp4: { title: 'YouTube to MP4', description: 'Download YouTube videos in MP4', gradient: 'from-red-600 to-red-800' },
+            transkrip: { title: 'Video Transcript', description: 'Generate transcripts from videos', gradient: 'from-blue-500 to-blue-700' },
+            twitter: { title: 'Twitter Downloader', description: 'Download Twitter videos and GIFs', gradient: 'from-blue-400 to-blue-600' },
+            ai: { title: 'AI Assistant', description: 'AI-powered tools for various tasks', gradient: 'from-blue-500 to-purple-600' },
+            douyin: { title: 'Douyin Downloader', description: 'Download Douyin videos easily', gradient: 'from-gray-800 to-gray-600' },
+            facebook: { title: 'Facebook Downloader', description: 'Save Facebook videos and photos', gradient: 'from-blue-600 to-blue-800' },
+            pinterest: { title: 'Pinterest Downloader', description: 'Download Pinterest images and videos', gradient: 'from-red-500 to-pink-500' },
+            rednote: { title: 'RedNote Downloader', description: 'Download RedNote content', gradient: 'from-red-600 to-red-800' },
+            spotify: { title: 'Spotify Downloader', description: 'Download Spotify tracks and playlists', gradient: 'from-green-500 to-green-700' },
+            imagecreation: { title: 'AI Image Creator', description: 'Generate images using AI', gradient: 'from-purple-500 to-pink-500' }
+        };
 
         // --- DOM ELEMENTS ---
         const loadingSpinner = document.getElementById('loading-spinner');
         const errorContainer = document.getElementById('error-container');
         const errorMessage = document.getElementById('error-message');
         const mainContent = document.getElementById('main-content');
+        const maintenancePage = document.getElementById('maintenance-page');
 
         // --- HELPER FUNCTIONS ---
-
-        /**
-         * Updates the CSS theme variables
-         * @param {HTMLElement} root - The root element (document.documentElement)
-         * @param {string} color - The primary color hex
-         * @param {string} gradation - The secondary color hex
-         */
-        function updateTheme(root, color, gradation) {
-            if (color) root.style.setProperty('--theme-primary', color);
-            if (gradation) root.style.setProperty('--theme-secondary', gradation);
+        function updateTheme(websetting) {
+            if (!websetting) return;
+            const primaryColor = '#' + websetting.color;
+            const secondaryColor = '#' + websetting.gradation;
+            document.documentElement.style.setProperty('--theme-primary', primaryColor);
+            document.documentElement.style.setProperty('--theme-secondary', secondaryColor);
         }
 
-        /**
-         * Creates the HTML for a single feature card
-         * @param {object} feature - The feature's static data (title, desc, etc.)
-         * @param {object} featureData - The feature's dynamic data from Firebase (icon, visitor)
-         * @returns {string} - The HTML string for the card
-         */
-        function createFeatureCardHTML(feature, featureData) {
-            const iconHTML = featureData?.icon ? `<img src="${featureData.icon}" class="w-12 h-12 mx-auto mb-4" alt="${feature.title}">` : `<div class="text-5xl mb-4">${feature.iconComponent}</div>`;
-            
+        function createFeatureCardHTML(key, dbData, configData) {
             return `
-                <div class="feature-card bg-gradient-to-br ${feature.gradientFrom} ${feature.gradientTo} p-6 rounded-2xl text-white shadow-lg cursor-pointer transform hover:-translate-y-2 transition-transform duration-300 animate-scaleIn" data-feature-key="${feature.key}">
+                <a href="${key}.html" class="block feature-card bg-gradient-to-br ${configData.gradient} p-6 rounded-2xl text-white shadow-lg cursor-pointer transform hover:-translate-y-2 transition-transform duration-300 animate-scaleIn">
                     <div class="flex items-center justify-center h-16">
-                        ${iconHTML}
+                        <img src="${dbData.icon}" class="w-12 h-12 object-contain mx-auto mb-4" alt="${configData.title}">
                     </div>
-                    <h4 class="text-xl font-bold mb-2 mt-4">${feature.title}</h4>
-                    <p class="text-sm opacity-90 mb-4">${feature.description}</p>
-                    <div class="flex items-center justify-center text-xs bg-white/20 rounded-full px-3 py-1">
+                    <h4 class="text-xl font-bold mb-2 mt-4 text-center">${configData.title}</h4>
+                    <p class="text-sm opacity-90 mb-4 text-center">${configData.description}</p>
+                    <div class="flex items-center justify-center text-xs bg-white/20 rounded-full px-3 py-1 w-fit mx-auto">
                         <i class="fas fa-users mr-2"></i>
-                        <span>${(featureData?.visitor || 0).toLocaleString()} visitors</span>
+                        <span>${(dbData.visitor || 0).toLocaleString()} visitors</span>
                     </div>
-                </div>
+                </a>
             `;
-        }
-        
-        /**
-         * Handles clicking on a feature card
-         * @param {string} featureKey - The key of the clicked feature (e.g., 'anime')
-         */
-        async function handleFeatureClick(featureKey) {
-            try {
-                await window.firebaseMINNRAI.tambahVisitor(featureKey);
-                window.location.href = `/${featureKey}`;
-            } catch (err) {
-                console.error("Failed to update visitor count:", err);
-                // Still navigate even if the visitor count fails
-                window.location.href = `/${featureKey}`;
-            }
         }
 
         // --- MAIN APPLICATION LOGIC ---
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const data = await window.firebaseMINNRAI.getWebData();
-                if (!data) {
-                    throw new Error("No data received from Firebase.");
+                if (!data) throw new Error("No data received from Firebase.");
+
+                // Check for maintenance mode first
+                if (data.webmaintenance && data.webmaintenance.maintenance === 'true') {
+                    document.getElementById('maintenance-char').src = data.webmaintenance.karakteranime;
+                    document.getElementById('maintenance-text').textContent = data.webmaintenance.teksmaintenance;
+                    loadingSpinner.style.display = 'none';
+                    maintenancePage.classList.remove('hidden');
+                    return; // Stop further execution
                 }
 
-                // --- Hide loader, show content ---
-                loadingSpinner.style.display = 'none';
-                mainContent.style.display = 'block';
-                
-                // --- Apply Theme ---
-                if (data.websetting) {
-                    updateTheme(document.documentElement, data.websetting.color, data.websetting.gradation);
-                    document.title = data.websetting.name || 'WebApp';
+                // Apply dynamic data
+                const websetting = data.websetting;
+                if (websetting) {
+                    updateTheme(websetting);
+                    const webName = websetting.name || 'WebApp';
+                    document.title = webName;
+                    document.getElementById('nav-icon').src = websetting.icon;
+                    document.getElementById('nav-title').textContent = webName;
+                    document.getElementById('hero-title').textContent = webName;
+                    document.getElementById('footer-text').textContent = websetting.watermark || `© 2025 ${webName}`;
                 }
 
-                // --- Welcome Overlay Logic ---
+                // Welcome Overlay Logic
                 const welcomeOverlay = document.getElementById('welcome-overlay');
                 if (data.sambutandatang) {
                     document.getElementById('welcome-char').src = data.sambutandatang.karakteranime;
                     document.getElementById('welcome-text').textContent = data.sambutandatang.katasambutan;
                     welcomeOverlay.classList.remove('hidden');
-
                     if (data.sambutandatang.soundsambutan) {
                         const audio = new Audio(data.sambutandatang.soundsambutan);
-                        // Play after a small delay to ensure user interaction is possible
                         setTimeout(() => audio.play().catch(e => console.warn("Audio play failed:", e)), 100);
                     }
-
                     document.getElementById('close-welcome').addEventListener('click', () => {
                         welcomeOverlay.classList.add('hidden');
-                        document.getElementById('app-container').style.opacity = 1;
                     });
-                } else {
-                     document.getElementById('app-container').style.opacity = 1;
                 }
 
-                // --- Populate Navigation, Hero, and Footer ---
-                if (data.websetting) {
-                    document.getElementById('nav-title').textContent = data.websetting.name;
-                    document.getElementById('hero-title').textContent = data.websetting.name;
-                    document.getElementById('footer-title').textContent = data.websetting.name;
-                }
-
-                // --- Render Features ---
+                // Render Features Dynamically
                 const featuresGrid = document.getElementById('features-grid');
-                const activeFeatures = ALL_FEATURES.filter(feature => {
-                    const featureData = data[feature.key];
-                    return featureData && featureData.aktif === 'true';
-                });
-
+                featuresGrid.innerHTML = '';
                 let totalVisitors = 0;
-                featuresGrid.innerHTML = ''; // Clear any placeholders
-                activeFeatures.forEach((feature, index) => {
-                    const featureData = data[feature.key];
-                    totalVisitors += (featureData?.visitor || 0);
-                    const cardHTML = createFeatureCardHTML(feature, featureData);
-                    const cardWrapper = document.createElement('div');
-                    cardWrapper.innerHTML = cardHTML;
-                    // Add animation delay dynamically
-                    cardWrapper.firstElementChild.style.animationDelay = `${0.1 * index}s`;
-                    featuresGrid.appendChild(cardWrapper.firstElementChild);
-                });
-                
-                // Add event listener to the grid for delegation
-                featuresGrid.addEventListener('click', (event) => {
-                    const card = event.target.closest('.feature-card');
-                    if (card && card.dataset.featureKey) {
-                        handleFeatureClick(card.dataset.featureKey);
+                let activeFeatureCount = 0;
+
+                Object.keys(FEATURE_CONFIG).forEach((key, index) => {
+                    const dbData = data[key];
+                    const configData = FEATURE_CONFIG[key];
+                    if (dbData && dbData.aktif === 'true' && configData) {
+                        activeFeatureCount++;
+                        totalVisitors += (dbData.visitor || 0);
+                        const cardHTML = createFeatureCardHTML(key, dbData, configData);
+                        const cardWrapper = document.createElement('div');
+                        cardWrapper.innerHTML = cardHTML;
+                        cardWrapper.firstElementChild.style.animationDelay = `${0.05 * index}s`;
+                        featuresGrid.appendChild(cardWrapper.firstElementChild);
                     }
                 });
 
-                // --- Populate Stats ---
+                // Populate Stats
                 document.getElementById('stats-total-visitors').textContent = totalVisitors.toLocaleString();
-                document.getElementById('stats-active-features').textContent = activeFeatures.length;
+                document.getElementById('stats-active-features').textContent = activeFeatureCount;
                 const animeSeriesCount = data.anime ? Object.keys(data.anime).filter(key => !isNaN(Number(key))).length : 0;
                 document.getElementById('stats-anime-series').textContent = animeSeriesCount;
+
+                // Show main content
+                loadingSpinner.style.display = 'none';
+                mainContent.classList.remove('hidden');
 
             } catch (error) {
                 console.error("Initialization failed:", error);
