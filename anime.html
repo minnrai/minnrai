@@ -198,7 +198,6 @@
         let animeList = [];
         let selectedAnimeId = null;
         let selectedEpisodeKey = null;
-        let controlsTimeout;
 
         // --- DOM ELEMENTS ---
         const loadingSpinner = document.getElementById('loading-spinner');
@@ -302,7 +301,7 @@
             
             if (selectedEpisodeKey && anime && anime.episode[selectedEpisodeKey]) {
                 playerContainer.innerHTML = createCustomPlayerHTML(anime.episode[selectedEpisodeKey]);
-                attachPlayerListeners();
+                attachPlayerListeners(anime.episode[selectedEpisodeKey]);
                 document.getElementById('player-title').innerHTML = `
                     <span>${anime.judul}</span>
                     <div class="ml-2 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">Episode ${selectedEpisodeKey.replace('eps', '')}</div>`;
@@ -329,144 +328,29 @@
         // --- CUSTOM VIDEO PLAYER ---
         function createCustomPlayerHTML() {
              return `
-                <div id="video-wrapper" class="relative aspect-video bg-black rounded-lg overflow-hidden video-container">
-                    <video id="custom-video-player" class="w-full h-full" preload="metadata"></video>
-                    <div id="video-watermark" class="absolute top-2 right-3 text-white font-bold text-xs sm:text-sm drop-shadow-lg pointer-events-none z-20" style="color: var(--theme-primary);">MINNRAI TV</div>
-                    <div class="video-controls absolute inset-0 flex flex-col justify-between p-2 sm:p-4 bg-gradient-to-t from-black/60 to-transparent z-10">
-                        <div></div> <!-- Spacer -->
-                        <div class="flex items-center justify-center space-x-8">
-                            <button id="rewind-btn" class="text-white text-2xl drop-shadow-md"><i class="fas fa-backward"></i></button>
-                            <button id="play-pause-btn" class="text-white text-4xl drop-shadow-md"><i class="fas fa-play"></i></button>
-                            <button id="forward-btn" class="text-white text-2xl drop-shadow-md"><i class="fas fa-forward"></i></button>
-                        </div>
-                        <div class="space-y-2">
-                            <div class="flex items-center gap-2">
-                                <span id="current-time" class="text-white text-xs font-mono">00:00</span>
-                                <input id="progress-bar" type="range" value="0" min="0" class="w-full">
-                                <span id="total-time" class="text-white text-xs font-mono">00:00</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <button id="volume-btn" class="text-white text-lg"><i class="fas fa-volume-high"></i></button>
-                                    <input id="volume-slider" type="range" value="1" min="0" max="1" step="0.1" class="w-16 sm:w-24">
-                                </div>
-                                <div class="flex items-center gap-2 sm:gap-4">
-                                    <select id="speed-select" class="bg-transparent text-white text-xs sm:text-sm border-none focus:outline-none appearance-none">
-                                        <option value="1" class="text-black">1x</option>
-                                        <option value="1.5" class="text-black">1.5x</option>
-                                        <option value="2" class="text-black">2x</option>
-                                    </select>
-                                    <button id="fullscreen-btn" class="text-white text-lg"><i class="fas fa-expand"></i></button>
-                                </div>
-                            </div>
-                        </div>
+                <div id="video-wrapper" class="relative aspect-video bg-black rounded-lg overflow-hidden">
+                    <div id="video-loader" class="absolute inset-0 flex items-center justify-center bg-black z-30">
+                        <div class="w-8 h-8 border-4 border-dashed rounded-full animate-spin border-white"></div>
                     </div>
+                    <iframe id="video-iframe" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
+                    <div id="video-watermark" class="absolute top-2 right-3 text-white font-bold text-xs sm:text-sm drop-shadow-lg pointer-events-none z-20" style="color: var(--theme-primary);">MINNRAI TV</div>
                 </div>
             `;
         }
         
-        function attachPlayerListeners() {
-            const video = document.getElementById('custom-video-player');
-            if (!video) return;
-            
-            const videoSrc = animeList.find(a => a.id === selectedAnimeId).episode[selectedEpisodeKey];
-            video.src = videoSrc;
-            
-            const videoWrapper = document.getElementById('video-wrapper');
-            const playPauseBtn = document.getElementById('play-pause-btn');
-            const rewindBtn = document.getElementById('rewind-btn');
-            const forwardBtn = document.getElementById('forward-btn');
-            const progressBar = document.getElementById('progress-bar');
-            const currentTimeEl = document.getElementById('current-time');
-            const totalTimeEl = document.getElementById('total-time');
-            const volumeBtn = document.getElementById('volume-btn');
-            const volumeSlider = document.getElementById('volume-slider');
-            const speedSelect = document.getElementById('speed-select');
-            const fullscreenBtn = document.getElementById('fullscreen-btn');
+        function attachPlayerListeners(videoSrc) {
+            const iframe = document.getElementById('video-iframe');
+            if (!iframe) return;
 
-            const formatTime = time => {
-                if (isNaN(time)) return '00:00';
-                const minutes = Math.floor(time / 60);
-                const seconds = Math.floor(time % 60);
-                return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            const loader = document.getElementById('video-loader');
+            iframe.src = videoSrc;
+            
+            iframe.onload = () => {
+                loader.style.display = 'none';
             };
-
-            const toggleControls = () => videoWrapper.classList.toggle('controls-visible');
-            
-            video.addEventListener('canplay', () => {
-                totalTimeEl.textContent = formatTime(video.duration);
-                progressBar.max = video.duration;
-                video.play();
-            });
-            video.addEventListener('timeupdate', () => {
-                currentTimeEl.textContent = formatTime(video.currentTime);
-                progressBar.value = video.currentTime;
-                const progressPercent = (video.currentTime / video.duration) * 100;
-                progressBar.style.background = `linear-gradient(to right, var(--theme-primary) ${progressPercent}%, rgba(255, 255, 255, 0.4) ${progressPercent}%)`;
-            });
-            video.addEventListener('play', () => {
-                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                videoWrapper.classList.remove('paused');
-                controlsTimeout = setTimeout(() => videoWrapper.classList.remove('controls-visible'), 3000);
-            });
-            video.addEventListener('pause', () => {
-                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-                videoWrapper.classList.add('paused');
-                clearTimeout(controlsTimeout);
-                videoWrapper.classList.add('controls-visible');
-            });
-            video.addEventListener('error', (e) => {
-                console.error("Video Error:", video.error);
-                document.getElementById('video-player-container').innerHTML = `<div class="aspect-video bg-black text-white flex items-center justify-center rounded-lg"><p>Gagal memuat video. 😢</p></div>`;
-            });
-            
-            videoWrapper.addEventListener('click', (e) => {
-                if (e.target === videoWrapper || e.target === video) {
-                    toggleControls();
-                }
-            });
-            videoWrapper.addEventListener('mousemove', () => {
-                videoWrapper.classList.add('controls-visible');
-                clearTimeout(controlsTimeout);
-                if (!video.paused) {
-                    controlsTimeout = setTimeout(() => videoWrapper.classList.remove('controls-visible'), 3000);
-                }
-            });
-            videoWrapper.addEventListener('mouseleave', () => {
-                 if (!video.paused) {
-                    videoWrapper.classList.remove('controls-visible');
-                 }
-            });
-
-            playPauseBtn.addEventListener('click', () => video.paused ? video.play() : video.pause());
-            rewindBtn.addEventListener('click', () => video.currentTime -= 10);
-            forwardBtn.addEventListener('click', () => video.currentTime += 10);
-            progressBar.addEventListener('input', () => video.currentTime = progressBar.value);
-            speedSelect.addEventListener('change', () => video.playbackRate = speedSelect.value);
-            
-            const toggleFullScreen = async () => {
-                if (!document.fullscreenElement) {
-                    await videoWrapper.requestFullscreen().catch(err => console.error(err));
-                    try { await screen.orientation.lock('landscape'); } catch (err) {}
-                } else {
-                    await document.exitFullscreen();
-                    screen.orientation.unlock();
-                }
+            iframe.onerror = () => {
+                loader.innerHTML = '<p class="text-white">Gagal memuat video. 😢</p>';
             };
-            fullscreenBtn.addEventListener('click', toggleFullScreen);
-            document.addEventListener('fullscreenchange', () => {
-                fullscreenBtn.innerHTML = document.fullscreenElement ? '<i class="fas fa-compress"></i>' : '<i class="fas fa-expand"></i>';
-            });
-
-            volumeSlider.addEventListener('input', e => {
-                video.volume = e.target.value;
-                video.muted = e.target.value == 0;
-            });
-            volumeBtn.addEventListener('click', () => video.muted = !video.muted);
-            video.addEventListener('volumechange', () => {
-                volumeSlider.value = video.muted ? 0 : video.volume;
-                volumeBtn.innerHTML = video.muted || video.volume === 0 ? '<i class="fas fa-volume-mute"></i>' : video.volume < 0.5 ? '<i class="fas fa-volume-low"></i>' : '<i class="fas fa-volume-high"></i>';
-            });
         }
 
         // --- VIEW SWITCHING & EVENT HANDLERS ---
@@ -475,6 +359,7 @@
             selectedEpisodeKey = null;
             episodePlayerView.classList.add('hidden');
             animeListView.classList.remove('hidden');
+            document.getElementById('video-player-container').innerHTML = ''; // Hentikan video saat kembali
         }
 
         function showEpisodePlayer(animeId) {
