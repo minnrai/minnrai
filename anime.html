@@ -21,8 +21,16 @@
             --theme-primary: #FFA6B8;
             --theme-secondary: #FDE5F2;
         }
+        html, body {
+            height: 100%;
+        }
         body {
             font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+        main {
+            flex-grow: 1;
         }
         /* Animations */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -40,7 +48,7 @@
             opacity: 0;
             transition: opacity 0.3s ease-in-out;
         }
-        .video-container:hover .video-controls {
+        .video-container:hover .video-controls, .video-container.paused .video-controls {
             opacity: 1;
         }
         /* Custom Range Slider for progress and volume */
@@ -61,6 +69,7 @@
             height: 16px;
             background: var(--theme-primary);
             border-radius: 50%;
+            border: 2px solid white;
         }
         #progress-bar {
             background: linear-gradient(to right, var(--theme-primary) 0%, var(--theme-primary) 0%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.4) 100%);
@@ -94,8 +103,8 @@
     </div>
 
     <!-- Main Content -->
-    <div id="main-content" class="hidden">
-        <div class="min-h-screen bg-gradient-to-br from-[var(--theme-secondary)] via-white to-[var(--theme-primary)]">
+    <div id="main-content" class="hidden flex flex-col h-full">
+        <div class="flex-grow flex flex-col min-h-screen bg-gradient-to-br from-[var(--theme-secondary)] via-white to-[var(--theme-primary)]">
             <!-- Navigation -->
             <nav class="sticky top-0 bg-white/80 backdrop-blur-lg z-40 shadow-sm">
                 <div class="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -106,7 +115,7 @@
                 </div>
             </nav>
 
-            <main class="container mx-auto px-4 py-8">
+            <main class="container mx-auto px-4 py-8 flex-grow">
                 <!-- Header -->
                 <div class="flex flex-col sm:flex-row items-center justify-between mb-8 animate-slideInUp gap-4">
                     <div class="flex items-center space-x-4">
@@ -188,7 +197,6 @@
         let animeList = [];
         let selectedAnimeId = null;
         let selectedEpisodeKey = null;
-        let controlsTimeout;
 
         // --- DOM ELEMENTS ---
         const loadingSpinner = document.getElementById('loading-spinner');
@@ -320,31 +328,31 @@
         function createCustomPlayerHTML(videoSrc) {
             return `
                 <div id="video-wrapper" class="relative aspect-video bg-black rounded-lg overflow-hidden video-container">
-                    <video id="custom-video-player" class="w-full h-full" src="${videoSrc}"></video>
-                    <div class="absolute top-2 right-2 text-white font-bold text-lg drop-shadow-lg pointer-events-none z-20">MINNRAI TV</div>
-                    <div class="video-controls absolute inset-0 flex flex-col justify-between p-4 bg-black/30 z-10">
+                    <video id="custom-video-player" class="w-full h-full" preload="metadata"></video>
+                    <div id="video-watermark" class="absolute top-2 right-3 text-white font-bold text-sm drop-shadow-lg pointer-events-none z-20" style="color: var(--theme-primary);">MINNRAI TV</div>
+                    <div class="video-controls absolute inset-0 flex flex-col justify-between p-2 sm:p-4 bg-gradient-to-t from-black/60 to-transparent z-10">
                         <!-- Top controls: not needed -->
                         <div></div>
                         <!-- Middle controls -->
                         <div class="flex items-center justify-center space-x-8">
-                            <button id="rewind-btn" class="text-white text-2xl"><i class="fas fa-backward"></i></button>
-                            <button id="play-pause-btn" class="text-white text-4xl"><i class="fas fa-play"></i></button>
-                            <button id="forward-btn" class="text-white text-2xl"><i class="fas fa-forward"></i></button>
+                            <button id="rewind-btn" class="text-white text-2xl drop-shadow-md"><i class="fas fa-backward"></i></button>
+                            <button id="play-pause-btn" class="text-white text-4xl drop-shadow-md"><i class="fas fa-play"></i></button>
+                            <button id="forward-btn" class="text-white text-2xl drop-shadow-md"><i class="fas fa-forward"></i></button>
                         </div>
                         <!-- Bottom controls -->
                         <div class="space-y-2">
                             <div class="flex items-center gap-2">
-                                <span id="current-time" class="text-white text-xs">00:00</span>
-                                <input id="progress-bar" type="range" value="0" min="0" max="100" class="w-full">
-                                <span id="total-time" class="text-white text-xs">00:00</span>
+                                <span id="current-time" class="text-white text-xs font-mono">00:00</span>
+                                <input id="progress-bar" type="range" value="0" min="0" class="w-full">
+                                <span id="total-time" class="text-white text-xs font-mono">00:00</span>
                             </div>
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-2">
                                     <button id="volume-btn" class="text-white text-lg"><i class="fas fa-volume-high"></i></button>
-                                    <input id="volume-slider" type="range" value="1" min="0" max="1" step="0.1" class="w-24">
+                                    <input id="volume-slider" type="range" value="1" min="0" max="1" step="0.1" class="w-16 sm:w-24">
                                 </div>
-                                <div class="flex items-center gap-4">
-                                    <select id="speed-select" class="bg-transparent text-white text-sm border-none focus:outline-none">
+                                <div class="flex items-center gap-2 sm:gap-4">
+                                    <select id="speed-select" class="bg-transparent text-white text-xs sm:text-sm border-none focus:outline-none appearance-none">
                                         <option value="1" class="text-black">1x</option>
                                         <option value="1.5" class="text-black">1.5x</option>
                                         <option value="2" class="text-black">2x</option>
@@ -361,7 +369,11 @@
         function attachPlayerListeners() {
             const video = document.getElementById('custom-video-player');
             if (!video) return;
+            // Set the source AFTER attaching listeners
+            video.src = animeList.find(a => a.id === selectedAnimeId).episode[selectedEpisodeKey];
+            video.load(); // Important for some browsers
 
+            const videoWrapper = document.getElementById('video-wrapper');
             const playPauseBtn = document.getElementById('play-pause-btn');
             const rewindBtn = document.getElementById('rewind-btn');
             const forwardBtn = document.getElementById('forward-btn');
@@ -372,7 +384,6 @@
             const volumeSlider = document.getElementById('volume-slider');
             const speedSelect = document.getElementById('speed-select');
             const fullscreenBtn = document.getElementById('fullscreen-btn');
-            const videoWrapper = document.getElementById('video-wrapper');
 
             const formatTime = time => {
                 const minutes = Math.floor(time / 60);
@@ -390,16 +401,43 @@
                 const progressPercent = (video.currentTime / video.duration) * 100;
                 progressBar.style.background = `linear-gradient(to right, var(--theme-primary) ${progressPercent}%, rgba(255, 255, 255, 0.4) ${progressPercent}%)`;
             });
-            video.addEventListener('play', () => playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>');
-            video.addEventListener('pause', () => playPauseBtn.innerHTML = '<i class="fas fa-play"></i>');
+            video.addEventListener('play', () => {
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                videoWrapper.classList.remove('paused');
+            });
+            video.addEventListener('pause', () => {
+                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                videoWrapper.classList.add('paused');
+            });
+            video.addEventListener('error', (e) => {
+                console.error("Video Error:", video.error);
+                playerContainer.innerHTML = `<div class="aspect-video bg-black text-white flex items-center justify-center rounded-lg"><p>Gagal memuat video. 😢</p></div>`;
+            });
             
             playPauseBtn.addEventListener('click', () => video.paused ? video.play() : video.pause());
             rewindBtn.addEventListener('click', () => video.currentTime -= 10);
             forwardBtn.addEventListener('click', () => video.currentTime += 10);
             progressBar.addEventListener('input', () => video.currentTime = progressBar.value);
             speedSelect.addEventListener('change', () => video.playbackRate = speedSelect.value);
-            fullscreenBtn.addEventListener('click', () => videoWrapper.requestFullscreen().catch(console.error));
             
+            const toggleFullScreen = async () => {
+                if (!document.fullscreenElement) {
+                    await videoWrapper.requestFullscreen();
+                    try {
+                        await screen.orientation.lock('landscape');
+                    } catch (err) {
+                        console.warn("Gagal mengunci orientasi:", err);
+                    }
+                } else {
+                    await document.exitFullscreen();
+                    screen.orientation.unlock();
+                }
+            };
+            fullscreenBtn.addEventListener('click', toggleFullScreen);
+            document.addEventListener('fullscreenchange', () => {
+                fullscreenBtn.innerHTML = document.fullscreenElement ? '<i class="fas fa-compress"></i>' : '<i class="fas fa-expand"></i>';
+            });
+
             volumeSlider.addEventListener('input', e => {
                 video.volume = e.target.value;
                 video.muted = e.target.value == 0;
@@ -409,13 +447,7 @@
             });
             video.addEventListener('volumechange', () => {
                 volumeSlider.value = video.muted ? 0 : video.volume;
-                if (video.muted || video.volume === 0) {
-                    volumeBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
-                } else if (video.volume < 0.5) {
-                    volumeBtn.innerHTML = '<i class="fas fa-volume-low"></i>';
-                } else {
-                    volumeBtn.innerHTML = '<i class="fas fa-volume-high"></i>';
-                }
+                volumeBtn.innerHTML = video.muted || video.volume === 0 ? '<i class="fas fa-volume-mute"></i>' : video.volume < 0.5 ? '<i class="fas fa-volume-low"></i>' : '<i class="fas fa-volume-high"></i>';
             });
         }
 
