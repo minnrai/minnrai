@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anime Streaming</title>
+    <title>Memuat Anime...</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,93 +18,140 @@
 
     <style>
         :root {
-            --theme-primary: #3b82f6; /* Default blue */
-            --theme-secondary: #ec4899; /* Default pink */
+            --theme-primary: #FFA6B8;
+            --theme-secondary: #FDE5F2;
         }
         body {
             font-family: 'Poppins', sans-serif;
         }
-        /* Simple CSS Animations */
+        /* Animations */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes pulse-icon { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
         .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
         .animate-slideInUp { animation: slideInUp 0.5s ease-out forwards; }
         .animate-scaleIn { animation: scaleIn 0.5s ease-out forwards; }
+        .animate-pulse-icon { animation: pulse-icon 1.5s infinite ease-in-out; }
+
+        /* Custom Video Player Styles */
+        .video-controls {
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .video-container:hover .video-controls {
+            opacity: 1;
+        }
+        /* Custom Range Slider for progress and volume */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 3px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            margin-top: -5px; /* (track-height - thumb-height) / 2 */
+            width: 16px;
+            height: 16px;
+            background: var(--theme-primary);
+            border-radius: 50%;
+        }
+        #progress-bar {
+            background: linear-gradient(to right, var(--theme-primary) 0%, var(--theme-primary) 0%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.4) 100%);
+        }
     </style>
 </head>
 <body class="bg-gray-50">
 
     <!-- Loading Spinner -->
-    <div id="loading-spinner" class="min-h-screen flex items-center justify-center">
-        <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>
-    </div>
-
-    <!-- Error Message -->
-    <div id="error-container" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 hidden">
-        <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md mx-4 text-center">
-            <div class="text-red-500 text-4xl mb-4">⚠️</div>
-            <h2 class="text-xl font-semibold text-gray-800 mb-2">Error Loading Anime Data</h2>
-            <p id="error-message" class="text-gray-600">Could not fetch data from the server.</p>
+    <div id="loading-spinner" class="min-h-screen flex items-center justify-center bg-white">
+        <div class="animate-pulse-icon">
+            <svg id="loading-heart-svg" class="w-20 h-20 text-pink-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
         </div>
     </div>
 
-    <!-- Main Content (initially hidden) -->
+    <!-- Maintenance Page -->
+    <div id="maintenance-page" class="hidden min-h-screen w-full flex items-center justify-center bg-gray-100 p-4">
+        <div class="text-center">
+            <img id="maintenance-char" src="" alt="Karakter Maintenance" class="w-48 h-48 mx-auto mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Dalam Perbaikan</h1>
+            <p id="maintenance-text" class="text-gray-600 max-w-md mx-auto"></p>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-container" class="hidden min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 p-4">
+        <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md mx-4 text-center">
+            <h2 class="text-xl font-semibold mb-2">Gagal Memuat Data Anime</h2>
+            <p id="error-message" class="text-gray-600">Tidak dapat mengambil data dari server.</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
     <div id="main-content" class="hidden">
-        <div class="min-h-screen bg-gradient-to-br from-theme-secondary via-white to-theme-primary">
+        <div class="min-h-screen bg-gradient-to-br from-[var(--theme-secondary)] via-white to-[var(--theme-primary)]">
             <!-- Navigation -->
-            <nav class="sticky top-0 bg-white/70 backdrop-blur-lg z-40 shadow-sm">
+            <nav class="sticky top-0 bg-white/80 backdrop-blur-lg z-40 shadow-sm">
                 <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-                    <h1 id="nav-title" class="text-xl font-bold text-gray-800">WebApp</h1>
-                    <a href="#" class="bg-gray-800 text-white px-4 py-2 rounded-full text-sm hover:bg-gray-900 transition">Get Started</a>
+                     <div class="flex items-center space-x-3">
+                        <img id="nav-icon" src="" alt="Icon" class="w-8 h-8 rounded-full">
+                        <h1 id="nav-title" class="text-xl font-bold text-gray-800"></h1>
+                    </div>
                 </div>
             </nav>
 
             <main class="container mx-auto px-4 py-8">
                 <!-- Header -->
-                <div class="flex items-center justify-between mb-8 animate-slideInUp">
+                <div class="flex flex-col sm:flex-row items-center justify-between mb-8 animate-slideInUp gap-4">
                     <div class="flex items-center space-x-4">
-                        <a href="index.html" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3">
+                        <a href="index.html" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent">
                             <i class="fas fa-arrow-left w-4 h-4 mr-2"></i>
-                            Back to Home
+                            Kembali
                         </a>
                         <div class="flex items-center space-x-2">
-                            <img id="header-icon" src="https://placehold.co/32x32" alt="Anime Icon" class="w-8 h-8 rounded">
-                            <h1 class="text-3xl font-poppins font-bold text-gray-800">Anime Streaming</h1>
+                            <img id="header-icon" src="" alt="Anime Icon" class="w-8 h-8 rounded">
+                            <h1 class="text-2xl sm:text-3xl font-poppins font-bold text-gray-800">Streaming Anime</h1>
                         </div>
                     </div>
-                    <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 space-x-1">
+                    <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold space-x-1">
                         <i class="fas fa-eye w-4 h-4"></i>
-                        <span id="visitor-count">0 visitors</span>
+                        <span id="visitor-count">0 pengunjung</span>
                     </div>
                 </div>
 
                 <!-- Anime List View -->
                 <div id="anime-list-view" class="animate-fadeIn">
-                    <div id="anime-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        <!-- Anime cards will be injected here -->
+                    <div class="mb-8">
+                        <input id="search-input" type="text" placeholder="Cari judul anime..." class="w-full p-3 rounded-lg border focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none transition-shadow">
                     </div>
+                    <div id="anime-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <!-- Kartu anime akan dimasukkan di sini -->
+                    </div>
+                    <p id="no-results" class="text-center text-gray-600 mt-8 hidden">Tidak ada anime yang ditemukan.</p>
                 </div>
 
                 <!-- Episode Player View -->
                 <div id="episode-player-view" class="hidden animate-fadeIn">
-                    <button id="back-to-list-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mb-6">
+                    <button id="back-to-list-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 mb-6 border border-input bg-background hover:bg-accent">
                         <i class="fas fa-arrow-left w-4 h-4 mr-2"></i>
-                        Back to Anime List
+                        Kembali ke Daftar Anime
                     </button>
                     
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <!-- Video Player -->
                         <div class="lg:col-span-2">
                             <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
-                                <div class="flex flex-col space-y-1.5 p-6">
-                                    <h3 id="player-title" class="text-2xl font-semibold leading-none tracking-tight flex items-center space-x-2">
-                                        <span>Anime Title</span>
-                                    </h3>
+                                <div class="p-4 sm:p-6 flex items-center justify-between">
+                                    <h3 id="player-title" class="text-xl sm:text-2xl font-semibold leading-tight flex items-center space-x-2"></h3>
                                 </div>
-                                <div id="video-player-container" class="p-6 pt-0">
-                                    <!-- Player or placeholder will be injected here -->
+                                <div id="video-player-container" class="p-4 sm:p-6 pt-0">
+                                    <!-- Pemutar Video Kustom akan dimasukkan di sini -->
                                 </div>
                             </div>
                         </div>
@@ -112,20 +159,12 @@
                         <!-- Episode List & Info -->
                         <div class="space-y-4">
                             <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
-                                <div class="flex flex-col space-y-1.5 p-6">
-                                    <h3 class="text-2xl font-semibold leading-none tracking-tight">Episodes</h3>
-                                </div>
-                                <div id="episode-list-container" class="p-6 pt-0 space-y-2 max-h-96 overflow-y-auto">
-                                    <!-- Episode buttons will be injected here -->
-                                </div>
+                                <div class="p-4 sm:p-6"><h3 class="text-xl sm:text-2xl font-semibold">Episode</h3></div>
+                                <div id="episode-list-container" class="p-4 sm:p-6 pt-0 space-y-2 max-h-96 overflow-y-auto"></div>
                             </div>
                             <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
-                                <div class="flex flex-col space-y-1.5 p-6">
-                                    <h3 class="text-2xl font-semibold leading-none tracking-tight">Anime Info</h3>
-                                </div>
-                                <div id="anime-info-container" class="p-6 pt-0">
-                                    <!-- Anime info will be injected here -->
-                                </div>
+                                <div class="p-4 sm:p-6"><h3 class="text-xl sm:text-2xl font-semibold">Info Anime</h3></div>
+                                <div id="anime-info-container" class="p-4 sm:p-6 pt-0"></div>
                             </div>
                         </div>
                     </div>
@@ -134,8 +173,8 @@
 
             <!-- Footer -->
             <footer class="bg-gray-800 text-white py-6 mt-12">
-                <div class="container mx-auto text-center">
-                    <p>&copy; 2024 <span id="footer-title">WebApp</span>. All Rights Reserved.</p>
+                <div class="container mx-auto text-center px-4">
+                    <p id="footer-text"></p>
                 </div>
             </footer>
         </div>
@@ -149,59 +188,72 @@
         let animeList = [];
         let selectedAnimeId = null;
         let selectedEpisodeKey = null;
+        let controlsTimeout;
 
         // --- DOM ELEMENTS ---
         const loadingSpinner = document.getElementById('loading-spinner');
         const errorContainer = document.getElementById('error-container');
-        const errorMessage = document.getElementById('error-message');
+        const pageErrorMessage = document.getElementById('error-message');
         const mainContent = document.getElementById('main-content');
+        const maintenancePage = document.getElementById('maintenance-page');
         const animeListView = document.getElementById('anime-list-view');
         const episodePlayerView = document.getElementById('episode-player-view');
         const animeGrid = document.getElementById('anime-grid');
         const backToListBtn = document.getElementById('back-to-list-btn');
+        const searchInput = document.getElementById('search-input');
+        const noResults = document.getElementById('no-results');
 
-        // --- RENDER FUNCTIONS ---
-
-        function updateTheme(root, color, gradation) {
-            if (color) root.style.setProperty('--theme-primary', color);
-            if (gradation) root.style.setProperty('--theme-secondary', gradation);
+        // --- UI RENDER FUNCTIONS ---
+        function updateTheme(websetting) {
+            if (!websetting) return;
+            const primaryColor = '#' + websetting.color;
+            const secondaryColor = '#' + websetting.gradation;
+            document.documentElement.style.setProperty('--theme-primary', primaryColor);
+            document.documentElement.style.setProperty('--theme-secondary', secondaryColor);
         }
 
         function renderStaticContent(data) {
             const websetting = data.websetting;
             if (websetting) {
-                updateTheme(document.documentElement, websetting.color, websetting.gradation);
-                document.title = `${websetting.name} - Anime`;
-                document.getElementById('nav-title').textContent = websetting.name;
-                document.getElementById('footer-title').textContent = websetting.name;
+                updateTheme(websetting);
+                const webName = websetting.name || 'WebApp';
+                document.title = `${webName} - Streaming Anime`;
+                document.getElementById('nav-icon').src = websetting.icon;
+                document.getElementById('nav-title').textContent = webName;
+                document.getElementById('footer-text').textContent = websetting.watermark || `© 2025 ${webName}`;
             }
             const animeData = data.anime;
             if (animeData) {
                 document.getElementById('header-icon').src = animeData.icon || 'https://placehold.co/32x32';
-                document.getElementById('visitor-count').textContent = `${(animeData.visitor || 0).toLocaleString()} visitors`;
+                document.getElementById('visitor-count').textContent = `${(animeData.visitor || 0).toLocaleString()} pengunjung`;
             }
         }
 
-        function renderAnimeList() {
-            animeGrid.innerHTML = ''; // Clear previous content
-            animeList.forEach((anime, index) => {
+        function renderAnimeList(filteredList) {
+            animeGrid.innerHTML = '';
+            const listToRender = filteredList || animeList;
+            
+            noResults.classList.toggle('hidden', listToRender.length > 0);
+
+            listToRender.forEach((anime, index) => {
                 const episodeCount = Object.keys(anime.episode || {}).length;
                 const card = document.createElement('div');
-                card.className = "rounded-lg border bg-card text-card-foreground shadow-sm cursor-pointer hover:shadow-lg transition-all duration-300 group hover:-translate-y-1 animate-scaleIn";
+                card.className = "anime-card rounded-lg border bg-white text-card-foreground shadow-sm cursor-pointer hover:shadow-lg transition-all duration-300 group hover:-translate-y-1 animate-scaleIn";
                 card.style.animationDelay = `${index * 0.05}s`;
                 card.dataset.animeId = anime.id;
+                card.dataset.title = anime.judul.toLowerCase();
                 card.innerHTML = `
                     <div class="relative overflow-hidden rounded-t-lg">
                         <img src="${anime.poster}" alt="${anime.judul}" class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300">
                         <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300"></div>
-                        <div class="absolute bottom-4 left-4 right-4">
-                            <h3 class="text-white font-semibold text-lg leading-tight drop-shadow-lg">${anime.judul}</h3>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+                            <h3 class="text-white font-semibold text-lg leading-tight drop-shadow-lg line-clamp-2">${anime.judul}</h3>
                         </div>
                     </div>
                     <div class="p-4 flex items-center justify-between">
-                        <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">${episodeCount} Episodes</div>
-                        <button class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium h-9 px-3 rounded-md bg-[var(--theme-primary)] text-white hover:bg-[var(--theme-primary)]/90">
-                            <i class="fas fa-play w-4 h-4 mr-1"></i> Watch
+                        <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">${episodeCount} Episode</div>
+                        <button class="inline-flex items-center justify-center text-sm font-medium h-9 px-3 rounded-md text-white" style="background-color: var(--theme-primary);">
+                            <i class="fas fa-play w-4 h-4 mr-1"></i> Tonton
                         </button>
                     </div>
                 `;
@@ -213,30 +265,24 @@
             const anime = animeList.find(a => a.id === selectedAnimeId);
             if (!anime) return;
 
-            // Render Player Title
             document.getElementById('player-title').innerHTML = `<span>${anime.judul}</span>`;
-
-            // Render Anime Info
             document.getElementById('anime-info-container').innerHTML = `
                 <img src="${anime.poster}" alt="${anime.judul}" class="w-full rounded-lg mb-4">
                 <h3 class="font-semibold text-lg mb-2">${anime.judul}</h3>
-                <p class="text-sm text-gray-600">Total Episodes: ${Object.keys(anime.episode || {}).length}</p>
-            `;
+                <p class="text-sm text-gray-600">Total Episode: ${Object.keys(anime.episode || {}).length}</p>`;
 
-            // Render Episode List
             const episodeListContainer = document.getElementById('episode-list-container');
             episodeListContainer.innerHTML = '';
             if (anime.episode) {
                 Object.keys(anime.episode).forEach(key => {
                     const button = document.createElement('button');
                     button.dataset.episodeKey = key;
-                    button.className = "episode-button w-full justify-start inline-flex items-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground";
+                    button.className = "episode-button w-full justify-start inline-flex items-center text-sm font-medium h-10 px-4 py-2 border border-input bg-background hover:bg-accent rounded-md";
                     button.innerHTML = `<i class="fas fa-play w-4 h-4 mr-2"></i> Episode ${key.replace('eps', '')}`;
                     episodeListContainer.appendChild(button);
                 });
             }
             
-            // Set initial player state
             updateVideoPlayer();
         }
 
@@ -245,45 +291,135 @@
             const playerContainer = document.getElementById('video-player-container');
             
             if (selectedEpisodeKey && anime && anime.episode[selectedEpisodeKey]) {
-                playerContainer.innerHTML = `
-                    <div class="aspect-video bg-black rounded-lg overflow-hidden">
-                        <video controls autoplay class="w-full h-full" poster="${anime.poster}">
-                            <source src="${anime.episode[selectedEpisodeKey]}" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    </div>
-                `;
-                // Update title with episode number
+                playerContainer.innerHTML = createCustomPlayerHTML(anime.episode[selectedEpisodeKey]);
+                attachPlayerListeners();
                 document.getElementById('player-title').innerHTML = `
                     <span>${anime.judul}</span>
-                    <div class="ml-2 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">${'Episode ' + selectedEpisodeKey.replace('eps', '')}</div>
-                `;
+                    <div class="ml-2 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">Episode ${selectedEpisodeKey.replace('eps', '')}</div>`;
             } else {
                 playerContainer.innerHTML = `
                     <div class="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
                         <div class="text-center">
                             <i class="fas fa-play-circle text-6xl text-gray-400 mb-4"></i>
-                            <p class="text-gray-600">Select an episode to start watching</p>
+                            <p class="text-gray-600">Pilih episode untuk mulai menonton</p>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }
             
-            // Highlight selected episode button
             document.querySelectorAll('.episode-button').forEach(btn => {
-                if (btn.dataset.episodeKey === selectedEpisodeKey) {
-                    btn.classList.remove('border', 'border-input', 'bg-background', 'hover:bg-accent');
-                    btn.classList.add('bg-[var(--theme-primary)]', 'text-white', 'hover:bg-[var(--theme-primary)]/90');
+                const isSelected = btn.dataset.episodeKey === selectedEpisodeKey;
+                btn.classList.toggle('border-input', !isSelected);
+                btn.classList.toggle('bg-background', !isSelected);
+                btn.classList.toggle('hover:bg-accent', !isSelected);
+                btn.classList.toggle('text-white', isSelected);
+                btn.style.backgroundColor = isSelected ? 'var(--theme-primary)' : '';
+            });
+        }
+
+        // --- CUSTOM VIDEO PLAYER ---
+        function createCustomPlayerHTML(videoSrc) {
+            return `
+                <div id="video-wrapper" class="relative aspect-video bg-black rounded-lg overflow-hidden video-container">
+                    <video id="custom-video-player" class="w-full h-full" src="${videoSrc}"></video>
+                    <div class="absolute top-2 right-2 text-white font-bold text-lg drop-shadow-lg pointer-events-none z-20">MINNRAI TV</div>
+                    <div class="video-controls absolute inset-0 flex flex-col justify-between p-4 bg-black/30 z-10">
+                        <!-- Top controls: not needed -->
+                        <div></div>
+                        <!-- Middle controls -->
+                        <div class="flex items-center justify-center space-x-8">
+                            <button id="rewind-btn" class="text-white text-2xl"><i class="fas fa-backward"></i></button>
+                            <button id="play-pause-btn" class="text-white text-4xl"><i class="fas fa-play"></i></button>
+                            <button id="forward-btn" class="text-white text-2xl"><i class="fas fa-forward"></i></button>
+                        </div>
+                        <!-- Bottom controls -->
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span id="current-time" class="text-white text-xs">00:00</span>
+                                <input id="progress-bar" type="range" value="0" min="0" max="100" class="w-full">
+                                <span id="total-time" class="text-white text-xs">00:00</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <button id="volume-btn" class="text-white text-lg"><i class="fas fa-volume-high"></i></button>
+                                    <input id="volume-slider" type="range" value="1" min="0" max="1" step="0.1" class="w-24">
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <select id="speed-select" class="bg-transparent text-white text-sm border-none focus:outline-none">
+                                        <option value="1" class="text-black">1x</option>
+                                        <option value="1.5" class="text-black">1.5x</option>
+                                        <option value="2" class="text-black">2x</option>
+                                    </select>
+                                    <button id="fullscreen-btn" class="text-white text-lg"><i class="fas fa-expand"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function attachPlayerListeners() {
+            const video = document.getElementById('custom-video-player');
+            if (!video) return;
+
+            const playPauseBtn = document.getElementById('play-pause-btn');
+            const rewindBtn = document.getElementById('rewind-btn');
+            const forwardBtn = document.getElementById('forward-btn');
+            const progressBar = document.getElementById('progress-bar');
+            const currentTimeEl = document.getElementById('current-time');
+            const totalTimeEl = document.getElementById('total-time');
+            const volumeBtn = document.getElementById('volume-btn');
+            const volumeSlider = document.getElementById('volume-slider');
+            const speedSelect = document.getElementById('speed-select');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            const videoWrapper = document.getElementById('video-wrapper');
+
+            const formatTime = time => {
+                const minutes = Math.floor(time / 60);
+                const seconds = Math.floor(time % 60);
+                return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            };
+
+            video.addEventListener('loadedmetadata', () => {
+                totalTimeEl.textContent = formatTime(video.duration);
+                progressBar.max = video.duration;
+            });
+            video.addEventListener('timeupdate', () => {
+                currentTimeEl.textContent = formatTime(video.currentTime);
+                progressBar.value = video.currentTime;
+                const progressPercent = (video.currentTime / video.duration) * 100;
+                progressBar.style.background = `linear-gradient(to right, var(--theme-primary) ${progressPercent}%, rgba(255, 255, 255, 0.4) ${progressPercent}%)`;
+            });
+            video.addEventListener('play', () => playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>');
+            video.addEventListener('pause', () => playPauseBtn.innerHTML = '<i class="fas fa-play"></i>');
+            
+            playPauseBtn.addEventListener('click', () => video.paused ? video.play() : video.pause());
+            rewindBtn.addEventListener('click', () => video.currentTime -= 10);
+            forwardBtn.addEventListener('click', () => video.currentTime += 10);
+            progressBar.addEventListener('input', () => video.currentTime = progressBar.value);
+            speedSelect.addEventListener('change', () => video.playbackRate = speedSelect.value);
+            fullscreenBtn.addEventListener('click', () => videoWrapper.requestFullscreen().catch(console.error));
+            
+            volumeSlider.addEventListener('input', e => {
+                video.volume = e.target.value;
+                video.muted = e.target.value == 0;
+            });
+            volumeBtn.addEventListener('click', () => {
+                video.muted = !video.muted;
+            });
+            video.addEventListener('volumechange', () => {
+                volumeSlider.value = video.muted ? 0 : video.volume;
+                if (video.muted || video.volume === 0) {
+                    volumeBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                } else if (video.volume < 0.5) {
+                    volumeBtn.innerHTML = '<i class="fas fa-volume-low"></i>';
                 } else {
-                    btn.classList.add('border', 'border-input', 'bg-background', 'hover:bg-accent');
-                    btn.classList.remove('bg-[var(--theme-primary)]', 'text-white', 'hover:bg-[var(--theme-primary)]/90');
+                    volumeBtn.innerHTML = '<i class="fas fa-volume-high"></i>';
                 }
             });
         }
 
-
-        // --- VIEW SWITCHING LOGIC ---
-
+        // --- VIEW SWITCHING & EVENT HANDLERS ---
         function showAnimeList() {
             selectedAnimeId = null;
             selectedEpisodeKey = null;
@@ -293,20 +429,15 @@
 
         function showEpisodePlayer(animeId) {
             selectedAnimeId = animeId;
-            selectedEpisodeKey = null; // Reset episode on new anime selection
+            selectedEpisodeKey = null;
             animeListView.classList.add('hidden');
             episodePlayerView.classList.remove('hidden');
             renderEpisodePlayer();
         }
-
-        // --- EVENT HANDLERS ---
         
         function handleGridClick(event) {
-            const card = event.target.closest('[data-anime-id]');
-            if (card) {
-                const animeId = card.dataset.animeId;
-                showEpisodePlayer(animeId);
-            }
+            const card = event.target.closest('.anime-card');
+            if (card) showEpisodePlayer(card.dataset.animeId);
         }
 
         function handleEpisodeClick(event) {
@@ -316,38 +447,56 @@
                 updateVideoPlayer();
             }
         }
+        
+        function handleSearch() {
+            const query = searchInput.value.toLowerCase();
+            const filtered = animeList.filter(anime => anime.judul.toLowerCase().includes(query));
+            renderAnimeList(filtered);
+        }
 
-        // --- INITIALIZATION ---
+        // --- MAIN INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                fullData = await window.firebaseMINNRAI.getWebData();
-                if (!fullData || !fullData.anime) {
-                    throw new Error("Anime data is not available.");
+                const data = await window.firebaseMINNRAI.getWebData();
+                if (!data) throw new Error("Tidak dapat mengambil data dari server.");
+                fullData = data;
+
+                const loadingHeart = document.getElementById('loading-heart-svg');
+                if (data.websetting && data.websetting.color) {
+                    loadingHeart.style.color = '#' + data.websetting.color;
                 }
 
-                // Process data
-                const animeData = fullData.anime;
+                if (data.webmaintenance && data.webmaintenance.maintenance === 'true') {
+                    document.getElementById('maintenance-char').src = data.webmaintenance.karakteranime;
+                    document.getElementById('maintenance-text').textContent = data.webmaintenance.teksmaintenance;
+                    loadingSpinner.style.display = 'none';
+                    maintenancePage.classList.remove('hidden');
+                    return;
+                }
+                
+                window.firebaseMINNRAI.tambahVisitor('anime').catch(console.error);
+
+                const animeData = data.anime;
+                if (!animeData) throw new Error("Data anime tidak tersedia.");
                 animeList = Object.keys(animeData)
-                    .filter(key => !isNaN(Number(key))) // Filter for numeric keys which represent anime entries
+                    .filter(key => !isNaN(Number(key)))
                     .map(key => ({ id: key, ...animeData[key] }));
 
-                // Initial Render
-                renderStaticContent(fullData);
+                renderStaticContent(data);
                 renderAnimeList();
 
-                // Attach Event Listeners
                 animeGrid.addEventListener('click', handleGridClick);
                 backToListBtn.addEventListener('click', showAnimeList);
                 document.getElementById('episode-list-container').addEventListener('click', handleEpisodeClick);
+                searchInput.addEventListener('input', handleSearch);
 
-                // Show content
                 loadingSpinner.style.display = 'none';
-                mainContent.style.display = 'block';
+                mainContent.classList.remove('hidden');
 
             } catch (error) {
                 console.error("Initialization failed:", error);
                 loadingSpinner.style.display = 'none';
-                errorMessage.textContent = error.message;
+                pageErrorMessage.textContent = error.message;
                 errorContainer.classList.remove('hidden');
             }
         });
