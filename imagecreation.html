@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Image Creator</title>
+    <title>Memuat...</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,110 +18,121 @@
 
     <style>
         :root {
-            --theme-primary: #3b82f6; /* Default blue */
-            --theme-secondary: #ec4899; /* Default pink */
+            --theme-primary: #FFA6B8;
+            --theme-secondary: #FDE5F2;
+        }
+        html, body {
+            height: 100%;
         }
         body {
             font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
         }
-        /* Simple CSS Animations */
+        #main-content {
+            flex: 1;
+        }
+        /* Animations */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideInX { from { opacity: 0; transform: translateX(var(--slide-x, 20px)); } to { opacity: 1; transform: translateX(0); } }
         @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes pulse-icon { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+        @keyframes pulse-icon { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
         .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
         .animate-slideInX { animation: slideInX 0.5s ease-out forwards; }
         .animate-scaleIn { animation: scaleIn 0.5s ease-out forwards; }
         .animate-spin-custom { animation: rotate 1s linear infinite; }
-        .animate-pulse-icon { animation: pulse-icon 1.5s ease-in-out infinite; }
+        .animate-pulse-icon { animation: pulse-icon 1.5s infinite ease-in-out; }
     </style>
 </head>
 <body class="bg-gray-50">
 
     <!-- Loading Spinner -->
-    <div id="loading-spinner" class="min-h-screen flex items-center justify-center">
-        <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>
-    </div>
-
-    <!-- Error Message on Page Load -->
-    <div id="error-container" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 hidden">
-        <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md mx-4 text-center">
-            <h2 class="text-xl font-semibold mb-2">Error Loading Page</h2>
-            <p id="error-message" class="text-gray-600">Could not fetch data.</p>
+    <div id="loading-spinner" class="min-h-screen flex items-center justify-center bg-white">
+        <div class="animate-pulse-icon">
+            <svg id="loading-heart-svg" class="w-20 h-20 text-pink-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
         </div>
     </div>
 
-    <!-- Main Content (initially hidden) -->
-    <div id="main-content" class="hidden">
-        <div class="min-h-screen bg-gradient-to-br from-theme-secondary via-white to-theme-primary">
+    <!-- Maintenance Page -->
+    <div id="maintenance-page" class="hidden min-h-screen w-full flex items-center justify-center bg-gray-100 p-4">
+        <div class="text-center">
+            <img id="maintenance-char" src="" alt="Karakter Maintenance" class="w-48 h-48 mx-auto mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Dalam Perbaikan</h1>
+            <p id="maintenance-text" class="text-gray-600 max-w-md mx-auto"></p>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-container" class="hidden min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 p-4">
+        <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md mx-4 text-center">
+            <h2 class="text-xl font-semibold mb-2">Gagal Memuat Halaman</h2>
+            <p id="error-message" class="text-gray-600">Tidak dapat mengambil data.</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="hidden flex flex-col h-full">
+        <div class="flex-grow flex flex-col min-h-screen bg-gradient-to-br from-[var(--theme-secondary)] via-white to-[var(--theme-primary)]">
             <!-- Navigation -->
-            <nav class="sticky top-0 bg-white/70 backdrop-blur-lg z-40 shadow-sm">
+            <nav class="sticky top-0 bg-white/80 backdrop-blur-lg z-40 shadow-sm">
                 <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-                    <h1 id="nav-title" class="text-xl font-bold text-gray-800">WebApp</h1>
-                    <a href="#" class="bg-gray-800 text-white px-4 py-2 rounded-full text-sm hover:bg-gray-900 transition">Get Started</a>
+                    <div class="flex items-center space-x-3">
+                        <img id="nav-icon" src="" alt="Icon" class="w-8 h-8 rounded-full">
+                        <h1 id="nav-title" class="text-xl font-bold text-gray-800"></h1>
+                    </div>
                 </div>
             </nav>
 
-            <main class="container mx-auto px-4 py-8">
+            <main class="container mx-auto px-4 py-8 flex-grow">
                 <!-- Header -->
-                <div class="flex items-center justify-between mb-8 animate-fadeIn">
+                <div class="flex flex-col sm:flex-row items-center justify-between mb-8 animate-slideInUp gap-4">
                     <div class="flex items-center space-x-4">
                         <a href="index.html" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent">
                             <i class="fas fa-arrow-left w-4 h-4 mr-2"></i>
-                            Back to Home
+                            Kembali
                         </a>
                         <div class="flex items-center space-x-2">
-                            <i class="fas fa-wand-magic-sparkles w-8 h-8 text-purple-500"></i>
-                            <h1 class="text-3xl font-poppins font-bold text-gray-800">AI Image Creator</h1>
+                            <i class="fas fa-wand-magic-sparkles text-2xl sm:text-3xl text-purple-500"></i>
+                            <h1 class="text-2xl sm:text-3xl font-poppins font-bold text-gray-800">AI Pembuat Gambar</h1>
                         </div>
                     </div>
                     <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold space-x-1">
                         <i class="fas fa-eye w-4 h-4"></i>
-                        <span id="visitor-count">0 visitors</span>
+                        <span id="visitor-count">0 pengunjung</span>
                     </div>
                 </div>
 
                 <div class="max-w-6xl mx-auto">
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <!-- Generation Controls -->
                         <div class="lg:col-span-1 animate-slideInX" style="--slide-x: -20px; animation-delay: 0.2s;">
-                            <div class="rounded-lg border bg-card text-card-foreground shadow-sm h-fit sticky top-24">
-                                <div class="p-6 flex items-center space-x-2">
+                            <div class="rounded-lg border bg-white/80 backdrop-blur-sm shadow-lg h-fit sticky top-24">
+                                <div class="p-6 flex items-center space-x-2 border-b">
                                     <i class="fas fa-sparkles w-5 h-5"></i>
-                                    <h3 class="text-lg font-semibold">Create Your Image</h3>
+                                    <h3 class="text-lg font-semibold">Buat Gambarmu</h3>
                                 </div>
-                                <div class="p-6 pt-0 space-y-4">
+                                <div class="p-6 space-y-4">
                                     <div>
-                                        <label class="block text-sm font-medium mb-2">Describe your image</label>
-                                        <textarea id="prompt-input" placeholder="A futuristic cityscape at sunset..." class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm h-24 resize-none"></textarea>
+                                        <label class="block text-sm font-medium mb-2">Deskripsikan gambarmu</label>
+                                        <textarea id="prompt-input" placeholder="Kucing lucu memakai topi penyihir di hutan ajaib..." class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm h-24 resize-none"></textarea>
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium mb-2">Try these ideas:</label>
+                                        <label class="block text-sm font-medium mb-2">Coba ide ini:</label>
                                         <div id="prompt-suggestions" class="space-y-1"></div>
                                     </div>
-                                    <div class="grid grid-cols-1 gap-4">
-                                        <div>
-                                            <label class="block text-sm font-medium mb-2">Style</label>
-                                            <select id="style-select" class="h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"></select>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium mb-2">Size</label>
-                                            <select id="size-select" class="h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"></select>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium mb-2">Quality: <span id="quality-value">80</span>%</label>
-                                            <input id="quality-slider" type="range" min="10" max="100" step="10" value="80" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                                        </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Gaya Gambar</label>
+                                        <select id="style-select" class="h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"></select>
                                     </div>
                                     <div id="form-error" class="hidden items-center rounded-lg border border-red-300 bg-red-50 text-red-700 p-3 text-sm">
                                         <i class="fas fa-exclamation-circle h-4 w-4 mr-2"></i>
                                         <span id="form-error-msg"></span>
                                     </div>
                                     <div class="flex space-x-2">
-                                        <button id="generate-btn" class="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 bg-[var(--theme-primary)] text-white hover:bg-[var(--theme-primary)]/90 disabled:opacity-50"></button>
-                                        <button id="clear-btn" class="hidden inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 border border-input bg-background hover:bg-accent">Clear</button>
+                                        <button id="generate-btn" class="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 text-white disabled:opacity-50" style="background-color: var(--theme-primary);"></button>
+                                        <button id="clear-btn" class="hidden inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 border border-input bg-background hover:bg-accent">Hapus</button>
                                     </div>
                                 </div>
                             </div>
@@ -129,7 +140,7 @@
 
                         <!-- Generated Images -->
                         <div id="results-container" class="lg:col-span-2 animate-slideInX" style="animation-delay: 0.4s;">
-                            <!-- Content changes dynamically -->
+                            <!-- Konten akan dimasukkan di sini -->
                         </div>
                     </div>
                 </div>
@@ -137,8 +148,8 @@
 
             <!-- Footer -->
             <footer class="bg-gray-800 text-white py-6 mt-12">
-                <div class="container mx-auto text-center">
-                    <p>&copy; 2024 <span id="footer-title">WebApp</span>. All Rights Reserved.</p>
+                <div class="container mx-auto text-center px-4">
+                    <p id="footer-text"></p>
                 </div>
             </footer>
         </div>
@@ -149,21 +160,18 @@
 
         // --- CONFIG & STATE ---
         let isLoading = false;
-        let generatedImages = [];
-        const PROMPT_SUGGESTIONS = ["A futuristic cityscape at sunset", "A cute cat wearing a wizard hat", "Abstract colorful geometric patterns", "A steampunk robot reading a book", "Mountain landscape with aurora borealis"];
-        const STYLE_OPTIONS = [{ value: 'realistic', label: 'Realistic' }, { value: 'cartoon', label: 'Cartoon' }, { value: 'anime', label: 'Anime' }, { value: 'oil-painting', label: 'Oil Painting' }, { value: 'watercolor', label: 'Watercolor' }, { value: 'digital-art', label: 'Digital Art' }, { value: 'sketch', label: 'Sketch' }, { value: 'cyberpunk', label: 'Cyberpunk' }];
-        const SIZE_OPTIONS = [{ value: '512x512', label: '512x512 (Square)' }, { value: '1024x1024', label: '1024x1024 (Square)' }, { value: '1024x768', label: '1024x768 (Landscape)' }, { value: '768x1024', label: '768x1024 (Portrait)' }];
+        let generatedImage = null; // Only one image at a time
+        const PROMPT_SUGGESTIONS = ["Pemandangan kota futuristik saat matahari terbenam", "Kucing lucu memakai topi penyihir di hutan ajaib", "Pola geometris abstrak berwarna-warni", "Robot steampunk membaca buku di perpustakaan", "Pemandangan gunung yang indah dengan aurora borealis"];
+        const STYLE_OPTIONS = [{ value: 'realistic', label: 'Realistis' }, { value: 'cartoon', label: 'Kartun' }, { value: 'anime', label: 'Anime' }, { value: 'oil-painting', label: 'Lukisan Cat Minyak' }, { value: 'watercolor', label: 'Cat Air' }, { value: 'digital-art', label: 'Seni Digital' }, { value: 'sketch', label: 'Sketsa' }, { value: 'cyberpunk', label: 'Cyberpunk' }];
 
         // --- DOM ELEMENTS ---
         const loadingSpinner = document.getElementById('loading-spinner');
         const errorContainer = document.getElementById('error-container');
-        const errorMessage = document.getElementById('error-message');
+        const pageErrorMessage = document.getElementById('error-message');
         const mainContent = document.getElementById('main-content');
+        const maintenancePage = document.getElementById('maintenance-page');
         const promptInput = document.getElementById('prompt-input');
         const styleSelect = document.getElementById('style-select');
-        const sizeSelect = document.getElementById('size-select');
-        const qualitySlider = document.getElementById('quality-slider');
-        const qualityValue = document.getElementById('quality-value');
         const generateBtn = document.getElementById('generate-btn');
         const clearBtn = document.getElementById('clear-btn');
         const formError = document.getElementById('form-error');
@@ -171,24 +179,28 @@
         const resultsContainer = document.getElementById('results-container');
         
         // --- UI RENDER FUNCTIONS ---
-        function updateTheme(root, color, gradation) {
-            if (color) root.style.setProperty('--theme-primary', color);
-            if (gradation) root.style.setProperty('--theme-secondary', gradation);
+        function updateTheme(websetting) {
+            if (!websetting) return;
+            const primaryColor = '#' + websetting.color;
+            const secondaryColor = '#' + websetting.gradation;
+            document.documentElement.style.setProperty('--theme-primary', primaryColor);
+            document.documentElement.style.setProperty('--theme-secondary', secondaryColor);
         }
 
         function renderStaticContent(data) {
             const websetting = data.websetting;
             if (websetting) {
-                updateTheme(document.documentElement, websetting.color, websetting.gradation);
-                document.title = `${websetting.name} - AI Image Creator`;
-                document.getElementById('nav-title').textContent = websetting.name;
-                document.getElementById('footer-title').textContent = websetting.name;
+                updateTheme(websetting);
+                const webName = websetting.name || 'WebApp';
+                document.title = `${webName} - AI Pembuat Gambar`;
+                document.getElementById('nav-icon').src = websetting.icon;
+                document.getElementById('nav-title').textContent = webName;
+                document.getElementById('footer-text').textContent = websetting.watermark || `© 2025 ${webName}`;
             }
-            document.getElementById('visitor-count').textContent = `${(data.imagecreation?.visitor || 0).toLocaleString()} visitors`;
+            document.getElementById('visitor-count').textContent = `${(data.imagecreation?.visitor || 0).toLocaleString()} pengunjung`;
         }
 
         function populateControls() {
-            // Suggestions
             const suggestionsContainer = document.getElementById('prompt-suggestions');
             PROMPT_SUGGESTIONS.forEach(s => {
                 const btn = document.createElement('button');
@@ -197,72 +209,42 @@
                 btn.onclick = () => { promptInput.value = s; };
                 suggestionsContainer.appendChild(btn);
             });
-            // Styles & Sizes
             STYLE_OPTIONS.forEach(o => styleSelect.add(new Option(o.label, o.value)));
-            SIZE_OPTIONS.forEach(o => sizeSelect.add(new Option(o.label, o.value)));
-            sizeSelect.value = '1024x1024';
         }
 
         function renderResults() {
-            resultsContainer.innerHTML = ''; // Clear previous
-            
             if (isLoading) {
                 resultsContainer.innerHTML = `
-                    <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
-                        <div class="p-6"><h3 class="text-lg font-semibold">Generating Images...</h3></div>
-                        <div class="p-6 pt-0 grid grid-cols-2 gap-4">
-                            ${[1, 2, 3, 4].map(i => `
-                                <div class="aspect-square bg-gray-200 rounded-lg animate-pulse flex items-center justify-center">
-                                    <div class="animate-pulse-icon" style="animation-delay: ${i * 0.1}s">
-                                        <i class="fas fa-wand-magic-sparkles text-3xl text-gray-400"></i>
-                                    </div>
-                                </div>`).join('')}
+                    <div class="aspect-square bg-gray-200 rounded-lg animate-pulse flex items-center justify-center">
+                        <div class="animate-pulse-icon">
+                            <i class="fas fa-wand-magic-sparkles text-5xl text-gray-400"></i>
                         </div>
                     </div>`;
+                return;
             }
 
-            if (generatedImages.length === 0 && !isLoading) {
+            if (!generatedImage) {
                 resultsContainer.innerHTML = `
-                    <div class="rounded-lg border bg-card text-card-foreground shadow-sm h-96">
-                        <div class="p-6 h-full flex items-center justify-center">
-                            <div class="text-center text-gray-500">
-                                <i class="fas fa-image text-6xl mx-auto mb-4 text-gray-300"></i>
-                                <h3 class="text-xl font-semibold mb-2">No images generated yet</h3>
-                                <p>Enter a description and click "Generate" to create AI images</p>
-                            </div>
+                    <div class="aspect-square bg-white/50 backdrop-blur-sm rounded-lg flex items-center justify-center p-4">
+                        <div class="text-center text-gray-500">
+                            <i class="fas fa-image text-6xl mx-auto mb-4 text-gray-300"></i>
+                            <h3 class="text-xl font-semibold mb-2">Belum ada gambar yang dibuat</h3>
+                            <p>Masukkan deskripsi dan klik "Buat Gambar" untuk memulai</p>
                         </div>
                     </div>`;
             } else {
-                const grid = document.createElement('div');
-                grid.className = 'grid grid-cols-2 gap-4';
-                generatedImages.forEach((image, index) => {
-                    const card = document.createElement('div');
-                    card.className = "animate-scaleIn";
-                    card.style.animationDelay = `${index * 0.1}s`;
-                    card.innerHTML = `
-                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm group hover:shadow-lg transition-shadow">
-                            <div class="p-0">
-                                <div class="relative aspect-square overflow-hidden rounded-t-lg">
-                                    <img src="${image.url}" alt="Generated: ${image.prompt}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300"></div>
-                                    <a href="${image.url}" download="ai-image-${image.id}.png" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center justify-center rounded-md text-sm font-medium h-8 px-2 bg-background hover:bg-accent">
-                                        <i class="fas fa-download w-3 h-3 mr-1.5"></i>Download
-                                    </a>
-                                </div>
-                                <div class="p-3">
-                                    <p class="text-sm text-gray-600 line-clamp-2 mb-2">${image.prompt}</p>
-                                    <div class="flex items-center justify-between text-xs text-gray-500">
-                                        <span>${image.style}</span>
-                                        <span>${image.timestamp}</span>
-                                    </div>
-                                </div>
+                resultsContainer.innerHTML = `
+                    <div class="animate-scaleIn">
+                        <div class="relative aspect-square overflow-hidden rounded-lg group shadow-lg">
+                            <img src="${generatedImage.url}" alt="Generated: ${generatedImage.prompt}" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center">
+                                <a href="${generatedImage.url}" download="minnrai-image-${generatedImage.id}.png" class="opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 bg-white text-black">
+                                    <i class="fas fa-download w-4 h-4 mr-2"></i>Unduh
+                                </a>
                             </div>
-                        </div>`;
-                    grid.appendChild(card);
-                });
-                if (grid.hasChildNodes()) {
-                    resultsContainer.appendChild(grid);
-                }
+                        </div>
+                        <p class="text-xs text-center text-gray-600 mt-2 italic">"${generatedImage.prompt}"</p>
+                    </div>`;
             }
         }
         
@@ -270,9 +252,9 @@
             isLoading = loading;
             generateBtn.disabled = loading;
             if (loading) {
-                generateBtn.innerHTML = `<div class="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin-custom"></div> Generating...`;
+                generateBtn.innerHTML = `<div class="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin-custom"></div> Membuat...`;
             } else {
-                generateBtn.innerHTML = `<i class="fas fa-wand-magic-sparkles w-4 h-4 mr-2"></i> Generate`;
+                generateBtn.innerHTML = `<i class="fas fa-wand-magic-sparkles w-4 h-4 mr-2"></i> Buat Gambar`;
             }
         }
 
@@ -285,64 +267,88 @@
         // --- EVENT HANDLERS ---
         function handleClear() {
             promptInput.value = '';
-            generatedImages = [];
+            generatedImage = null;
             formError.classList.add('hidden');
             clearBtn.classList.add('hidden');
             renderResults();
         }
 
         async function handleGenerate() {
-            const prompt = promptInput.value.trim();
-            if (!prompt) {
-                showError('Please enter a description for your image');
+            const userPrompt = promptInput.value.trim();
+            const style = styleSelect.value;
+            if (!userPrompt) {
+                showError('Silakan masukkan deskripsi untuk gambarmu.');
                 return;
             }
 
+            const finalPrompt = `${userPrompt}, style ${style}`;
             setButtonState(true);
             formError.classList.add('hidden');
             renderResults(); // Show loading state
 
-            // Simulate API call
-            setTimeout(() => {
-                const newImages = Array.from({ length: 4 }).map((_, i) => ({
-                    id: Date.now() + i,
-                    url: `https://placehold.co/512x512/${Math.floor(Math.random()*16777215).toString(16)}/FFFFFF?text=AI+Image+${i+1}`,
-                    prompt: prompt,
-                    style: styleSelect.value,
-                    size: sizeSelect.value,
-                    timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
-                }));
+            const apiUrl = `https://api.siputzx.my.id/api/ai/flux?prompt=${encodeURIComponent(finalPrompt)}`;
+
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error(`Gagal menghubungi server: ${response.statusText}`);
+                }
+                const imageBlob = await response.blob();
+                const imageUrl = URL.createObjectURL(imageBlob);
+
+                generatedImage = {
+                    id: Date.now(),
+                    url: imageUrl,
+                    prompt: finalPrompt
+                };
                 
-                generatedImages = [...newImages, ...generatedImages];
+            } catch (err) {
+                console.error("API call failed:", err);
+                showError(err.message || 'Gagal membuat gambar. Coba lagi nanti.');
+                generatedImage = null; // Clear image on error
+            } finally {
                 setButtonState(false);
                 clearBtn.classList.remove('hidden');
-                renderResults();
-            }, 4000);
+                renderResults(); // Render final image or empty state
+            }
         }
 
-        // --- INITIALIZATION ---
+        // --- MAIN INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const data = await window.firebaseMINNRAI.getWebData();
-                if (!data) throw new Error("No data received from Firebase.");
+                if (!data) throw new Error("Tidak dapat mengambil data dari server.");
+
+                const loadingHeart = document.getElementById('loading-heart-svg');
+                if (data.websetting && data.websetting.color) {
+                    loadingHeart.style.color = '#' + data.websetting.color;
+                }
+
+                if (data.webmaintenance && data.webmaintenance.maintenance === 'true') {
+                    document.getElementById('maintenance-char').src = data.webmaintenance.karakteranime;
+                    document.getElementById('maintenance-text').textContent = data.webmaintenance.teksmaintenance;
+                    loadingSpinner.style.display = 'none';
+                    maintenancePage.classList.remove('hidden');
+                    return;
+                }
+                
+                window.firebaseMINNRAI.tambahVisitor('imagecreation').catch(console.error);
 
                 renderStaticContent(data);
                 populateControls();
                 setButtonState(false);
                 renderResults();
 
-                // Attach Event Listeners
                 generateBtn.addEventListener('click', handleGenerate);
                 clearBtn.addEventListener('click', handleClear);
-                qualitySlider.addEventListener('input', (e) => { qualityValue.textContent = e.target.value; });
 
                 loadingSpinner.style.display = 'none';
-                mainContent.style.display = 'block';
+                mainContent.classList.remove('hidden');
 
             } catch (err) {
                 console.error("Initialization failed:", err);
                 loadingSpinner.style.display = 'none';
-                errorMessage.textContent = err.message;
+                pageErrorMessage.textContent = err.message;
                 errorContainer.classList.remove('hidden');
             }
         });
