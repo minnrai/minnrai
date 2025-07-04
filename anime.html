@@ -42,39 +42,6 @@
         .animate-slideInUp { animation: slideInUp 0.5s ease-out forwards; }
         .animate-scaleIn { animation: scaleIn 0.5s ease-out forwards; }
         .animate-pulse-icon { animation: pulse-icon 1.5s infinite ease-in-out; }
-
-        /* Custom Video Player Styles */
-        .video-controls {
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-        }
-        .video-container.controls-visible .video-controls {
-            opacity: 1;
-        }
-        /* Custom Range Slider for progress and volume */
-        input[type=range] {
-            -webkit-appearance: none;
-            background: transparent;
-            cursor: pointer;
-            width: 100%;
-        }
-        input[type=range]::-webkit-slider-runnable-track {
-            height: 6px;
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 3px;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            margin-top: -5px;
-            width: 16px;
-            height: 16px;
-            background: var(--theme-primary);
-            border-radius: 50%;
-            border: 2px solid white;
-        }
-        #progress-bar {
-            background: linear-gradient(to right, var(--theme-primary) 0%, var(--theme-primary) 0%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.4) 100%);
-        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -107,7 +74,7 @@
     <div id="main-content" class="hidden flex flex-col h-full">
         <div class="flex-grow flex flex-col min-h-screen bg-gradient-to-br from-[var(--theme-secondary)] via-white to-[var(--theme-primary)]">
             <!-- Navigation -->
-            <nav class="sticky top-0 bg-white/80 backdrop-blur-lg z-40 shadow-sm">
+            <nav class="sticky top-0 bg-white/80 backdrop-blur-lg z-30 shadow-sm">
                 <div class="container mx-auto px-4 py-3 flex justify-between items-center">
                      <div class="flex items-center space-x-3">
                         <img id="nav-icon" src="" alt="Icon" class="w-8 h-8 rounded-full">
@@ -161,7 +128,7 @@
                                     <h3 id="player-title" class="text-xl sm:text-2xl font-semibold leading-tight flex items-center space-x-2"></h3>
                                 </div>
                                 <div id="video-player-container" class="p-4 sm:p-6 pt-0">
-                                    <!-- Pemutar Video Kustom akan dimasukkan di sini -->
+                                    <!-- Pemutar Video akan dimasukkan di sini -->
                                 </div>
                             </div>
                         </div>
@@ -300,8 +267,7 @@
             const playerContainer = document.getElementById('video-player-container');
             
             if (selectedEpisodeKey && anime && anime.episode[selectedEpisodeKey]) {
-                playerContainer.innerHTML = createCustomPlayerHTML(anime.episode[selectedEpisodeKey]);
-                attachPlayerListeners(anime.episode[selectedEpisodeKey]);
+                playerContainer.innerHTML = createIframePlayerHTML(anime.episode[selectedEpisodeKey]);
                 document.getElementById('player-title').innerHTML = `
                     <span>${anime.judul}</span>
                     <div class="ml-2 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">Episode ${selectedEpisodeKey.replace('eps', '')}</div>`;
@@ -325,34 +291,24 @@
             });
         }
 
-        // --- CUSTOM VIDEO PLAYER ---
-        function createCustomPlayerHTML() {
+        // --- IFRAME VIDEO PLAYER ---
+        function createIframePlayerHTML(videoSrc) {
              return `
                 <div id="video-wrapper" class="relative aspect-video bg-black rounded-lg overflow-hidden">
-                    <div id="video-loader" class="absolute inset-0 flex items-center justify-center bg-black z-30">
+                    <div id="video-loader" class="absolute inset-0 flex items-center justify-center bg-black z-20">
                         <div class="w-8 h-8 border-4 border-dashed rounded-full animate-spin border-white"></div>
                     </div>
-                    <iframe id="video-iframe" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
+                    <iframe id="video-iframe" class="absolute inset-0 w-full h-full z-10" 
+                            src="${videoSrc}" 
+                            frameborder="0" 
+                            allow="autoplay; fullscreen" 
+                            allowfullscreen>
+                    </iframe>
                     <div id="video-watermark" class="absolute top-2 right-3 text-white font-bold text-xs sm:text-sm drop-shadow-lg pointer-events-none z-20" style="color: var(--theme-primary);">MINNRAI TV</div>
                 </div>
             `;
         }
         
-        function attachPlayerListeners(videoSrc) {
-            const iframe = document.getElementById('video-iframe');
-            if (!iframe) return;
-
-            const loader = document.getElementById('video-loader');
-            iframe.src = videoSrc;
-            
-            iframe.onload = () => {
-                loader.style.display = 'none';
-            };
-            iframe.onerror = () => {
-                loader.innerHTML = '<p class="text-white">Gagal memuat video. 😢</p>';
-            };
-        }
-
         // --- VIEW SWITCHING & EVENT HANDLERS ---
         function showAnimeList() {
             selectedAnimeId = null;
@@ -378,8 +334,19 @@
         function handleEpisodeClick(event) {
             const button = event.target.closest('.episode-button');
             if (button) {
+                // Tampilkan loader segera setelah episode diklik
+                const playerContainer = document.getElementById('video-player-container');
+                playerContainer.innerHTML = `
+                    <div class="aspect-video bg-black rounded-lg flex items-center justify-center">
+                        <div class="w-8 h-8 border-4 border-dashed rounded-full animate-spin border-white"></div>
+                    </div>`;
+
                 selectedEpisodeKey = button.dataset.episodeKey;
-                updateVideoPlayer();
+                
+                // Beri sedikit jeda agar UI sempat update sebelum memuat iframe
+                setTimeout(() => {
+                    updateVideoPlayer();
+                }, 100);
             }
         }
         
