@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Downloader</title>
+    <title>Memuat...</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,86 +18,109 @@
 
     <style>
         :root {
-            --theme-primary: #3b82f6; /* Default blue */
-            --theme-secondary: #ec4899; /* Default pink */
+            --theme-primary: #FFA6B8;
+            --theme-secondary: #FDE5F2;
+        }
+        html, body {
+            height: 100%;
         }
         body {
             font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
         }
-        /* Simple CSS Animations */
+        #main-content {
+            flex: 1;
+        }
+        /* Animations */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes pulse-icon { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
         .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
         .animate-slideInUp { animation: slideInUp 0.5s ease-out forwards; }
         .animate-spin-custom { animation: rotate 1s linear infinite; }
+        .animate-pulse-icon { animation: pulse-icon 1.5s infinite ease-in-out; }
     </style>
 </head>
 <body class="bg-gray-50">
 
     <!-- Loading Spinner -->
-    <div id="loading-spinner" class="min-h-screen flex items-center justify-center">
-        <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>
-    </div>
-
-    <!-- Error Message on Page Load -->
-    <div id="error-container" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 hidden">
-        <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md mx-4 text-center">
-            <h2 class="text-xl font-semibold mb-2">Error Loading Page</h2>
-            <p id="error-message" class="text-gray-600">Could not fetch data.</p>
+    <div id="loading-spinner" class="min-h-screen flex items-center justify-center bg-white">
+        <div class="animate-pulse-icon">
+            <svg id="loading-heart-svg" class="w-20 h-20 text-pink-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
         </div>
     </div>
 
-    <!-- Main Content (initially hidden) -->
-    <div id="main-content" class="hidden">
-        <div class="min-h-screen bg-gradient-to-br from-theme-secondary via-white to-theme-primary">
+    <!-- Maintenance / Disabled Page -->
+    <div id="status-page" class="hidden min-h-screen w-full flex items-center justify-center bg-gray-100 p-4">
+        <div class="text-center">
+            <img id="status-char" src="" alt="Karakter" class="w-48 h-48 mx-auto mb-6">
+            <h1 id="status-title" class="text-3xl font-bold text-gray-800 mb-2"></h1>
+            <p id="status-text" class="text-gray-600 max-w-md mx-auto"></p>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-container" class="hidden min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 p-4">
+        <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md mx-4 text-center">
+            <h2 class="text-xl font-semibold mb-2">Gagal Memuat Halaman</h2>
+            <p id="error-message" class="text-gray-600">Tidak dapat mengambil data.</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="hidden flex flex-col h-full">
+        <div class="flex-grow flex flex-col min-h-screen bg-gradient-to-br from-[var(--theme-secondary)] via-white to-[var(--theme-primary)]">
             <!-- Navigation -->
-            <nav class="sticky top-0 bg-white/70 backdrop-blur-lg z-40 shadow-sm">
+            <nav class="sticky top-0 bg-white/80 backdrop-blur-lg z-40 shadow-sm">
                 <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-                    <h1 id="nav-title" class="text-xl font-bold text-gray-800">WebApp</h1>
-                    <a href="#" class="bg-gray-800 text-white px-4 py-2 rounded-full text-sm hover:bg-gray-900 transition">Get Started</a>
+                    <div class="flex items-center space-x-3">
+                        <img id="nav-icon" src="" alt="Icon" class="w-8 h-8 rounded-full">
+                        <h1 id="nav-title" class="text-xl font-bold text-gray-800"></h1>
+                    </div>
                 </div>
             </nav>
 
-            <main class="container mx-auto px-4 py-8">
+            <main class="container mx-auto px-4 py-8 flex-grow">
                 <!-- Header -->
-                <div class="flex items-center justify-between mb-8 animate-slideInUp">
+                <div class="flex flex-col sm:flex-row items-center justify-between mb-8 animate-slideInUp gap-4">
                     <div class="flex items-center space-x-4">
-                        <a href="index.html" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent">
+                        <a href="index.html" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent">
                             <i class="fas fa-arrow-left w-4 h-4 mr-2"></i>
-                            Back to Home
+                            Kembali
                         </a>
                         <div class="flex items-center space-x-2">
-                            <i class="fab fa-tiktok text-2xl"></i>
-                            <h1 class="text-3xl font-poppins font-bold text-gray-800">TikTok Downloader</h1>
+                            <i class="fab fa-tiktok text-2xl sm:text-3xl"></i>
+                            <h1 class="text-2xl sm:text-3xl font-poppins font-bold text-gray-800">TikTok Downloader</h1>
                         </div>
                     </div>
                     <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold space-x-1">
                         <i class="fas fa-eye w-4 h-4"></i>
-                        <span id="visitor-count">0 visitors</span>
+                        <span id="visitor-count">0 pengunjung</span>
                     </div>
                 </div>
 
                 <div class="max-w-2xl mx-auto">
                     <!-- Download Form -->
                     <div class="animate-fadeIn mb-6" style="animation-delay: 0.2s;">
-                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                        <div class="rounded-lg border bg-white/80 backdrop-blur-sm shadow-lg">
                             <div class="p-6 flex items-center space-x-2">
                                 <i class="fas fa-download w-5 h-5"></i>
-                                <h3 class="text-lg font-semibold">Download TikTok Video</h3>
+                                <h3 class="text-lg font-semibold">Unduh Video TikTok</h3>
                             </div>
                             <div class="p-6 pt-0 space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium mb-2">TikTok URL</label>
-                                    <input id="url-input" type="url" placeholder="https://www.tiktok.com/@username/video/..." class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                                    <label class="block text-sm font-medium mb-2">URL TikTok</label>
+                                    <input id="url-input" type="url" placeholder="https://vt.tiktok.com/..." class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
                                 </div>
                                 <div id="form-error" class="hidden items-center rounded-lg border border-red-300 bg-red-50 text-red-700 p-3 text-sm">
                                     <i class="fas fa-exclamation-circle h-4 w-4 mr-2"></i>
                                     <span id="form-error-msg"></span>
                                 </div>
                                 <div class="flex space-x-2">
-                                    <button id="download-btn" class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 bg-[var(--theme-primary)] text-white hover:bg-[var(--theme-primary)]/90 disabled:opacity-50"></button>
+                                    <button id="download-btn" class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 text-white disabled:opacity-50" style="background-color: var(--theme-primary);"></button>
                                     <button id="reset-btn" class="hidden inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 border border-input bg-background hover:bg-accent">Reset</button>
                                 </div>
                             </div>
@@ -106,43 +129,14 @@
 
                     <!-- Download Result -->
                     <div id="result-card" class="hidden animate-fadeIn">
-                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
-                            <div class="p-6"><h3 class="text-lg font-semibold">Download Ready</h3></div>
-                            <div class="p-6 pt-0">
-                                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                                    <img id="result-thumbnail" src="" alt="Video thumbnail" class="w-24 h-32 object-cover rounded-lg mx-auto sm:mx-0">
-                                    <div class="flex-1">
-                                        <h3 id="result-title" class="font-semibold text-lg mb-2"></h3>
-                                        <p id="result-author" class="text-gray-600 mb-1"></p>
-                                        <p id="result-meta" class="text-sm text-gray-500 mb-4"></p>
-                                        <div class="space-y-2">
-                                            <a id="result-download-video" href="#" class="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 bg-[var(--theme-primary)] text-white hover:bg-[var(--theme-primary)]/90">
-                                                <i class="fas fa-download w-4 h-4 mr-2"></i>
-                                                Download Video (No Watermark)
-                                            </a>
-                                            <a id="result-download-audio" href="#" class="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 border border-input bg-background hover:bg-accent">
-                                                <i class="fas fa-music w-4 h-4 mr-2"></i>
-                                                Download Audio Only
-                                            </a>
-                                        </div>
-                                    </div>
+                        <div class="rounded-lg border bg-white/80 backdrop-blur-sm shadow-lg">
+                            <div class="p-6"><h3 class="text-lg font-semibold">Unduhan Siap</h3></div>
+                            <div class="p-6 pt-0 space-y-4">
+                                <p id="result-description" class="text-sm text-gray-700 italic border-l-4 border-gray-300 pl-3"></p>
+                                <div id="result-stats" class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500"></div>
+                                <div id="result-downloads" class="space-y-2">
+                                    <!-- Tombol unduh akan dimasukkan di sini -->
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Instructions -->
-                    <div class="mt-8 animate-fadeIn" style="animation-delay: 0.4s;">
-                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
-                            <div class="p-6"><h3 class="text-lg font-semibold">How to use TikTok Downloader</h3></div>
-                            <div class="p-6 pt-0">
-                                <ol class="list-decimal list-inside space-y-2 text-gray-600">
-                                    <li>Open TikTok app or website and find the video you want to download</li>
-                                    <li>Tap the "Share" button and then "Copy Link"</li>
-                                    <li>Paste the URL in the input field above</li>
-                                    <li>Click the "Download" button</li>
-                                    <li>Choose to download the video without watermark or just the audio</li>
-                                </ol>
                             </div>
                         </div>
                     </div>
@@ -151,8 +145,8 @@
 
             <!-- Footer -->
             <footer class="bg-gray-800 text-white py-6 mt-12">
-                <div class="container mx-auto text-center">
-                    <p>&copy; 2024 <span id="footer-title">WebApp</span>. All Rights Reserved.</p>
+                <div class="container mx-auto text-center px-4">
+                    <p id="footer-text"></p>
                 </div>
             </footer>
         </div>
@@ -167,37 +161,46 @@
         const errorContainer = document.getElementById('error-container');
         const pageErrorMessage = document.getElementById('error-message');
         const mainContent = document.getElementById('main-content');
+        const maintenancePage = document.getElementById('status-page');
         const urlInput = document.getElementById('url-input');
         const downloadBtn = document.getElementById('download-btn');
         const resetBtn = document.getElementById('reset-btn');
         const formError = document.getElementById('form-error');
         const formErrorMsg = document.getElementById('form-error-msg');
         const resultCard = document.getElementById('result-card');
+        const resultDownloads = document.getElementById('result-downloads');
+        const resultDescription = document.getElementById('result-description');
+        const resultStats = document.getElementById('result-stats');
 
         // --- UI UPDATE FUNCTIONS ---
-        function updateTheme(root, color, gradation) {
-            if (color) root.style.setProperty('--theme-primary', color);
-            if (gradation) root.style.setProperty('--theme-secondary', gradation);
+        function updateTheme(websetting) {
+            if (!websetting) return;
+            const primaryColor = '#' + websetting.color;
+            const secondaryColor = '#' + websetting.gradation;
+            document.documentElement.style.setProperty('--theme-primary', primaryColor);
+            document.documentElement.style.setProperty('--theme-secondary', secondaryColor);
         }
 
         function renderStaticContent(data) {
             const websetting = data.websetting;
             if (websetting) {
-                updateTheme(document.documentElement, websetting.color, websetting.gradation);
-                document.title = `${websetting.name} - TikTok Downloader`;
-                document.getElementById('nav-title').textContent = websetting.name;
-                document.getElementById('footer-title').textContent = websetting.name;
+                updateTheme(websetting);
+                const webName = websetting.name || 'WebApp';
+                document.title = `${webName} - TikTok Downloader`;
+                document.getElementById('nav-icon').src = websetting.icon;
+                document.getElementById('nav-title').textContent = webName;
+                document.getElementById('footer-text').textContent = websetting.watermark || `© 2025 ${webName}`;
             }
-            document.getElementById('visitor-count').textContent = `${(data.tiktok?.visitor || 0).toLocaleString()} visitors`;
+            document.getElementById('visitor-count').textContent = `${(data.tiktok?.visitor || 0).toLocaleString()} pengunjung`;
         }
 
         function setButtonState(loading) {
             isLoading = loading;
             downloadBtn.disabled = loading;
             if (loading) {
-                downloadBtn.innerHTML = `<div class="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin-custom"></div> Processing...`;
+                downloadBtn.innerHTML = `<div class="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin-custom"></div> Memproses...`;
             } else {
-                downloadBtn.innerHTML = `<i class="fas fa-download w-4 h-4 mr-2"></i> Download`;
+                downloadBtn.innerHTML = `<i class="fas fa-download w-4 h-4 mr-2"></i> Unduh`;
             }
         }
 
@@ -213,13 +216,36 @@
         }
 
         function renderResult(data) {
-            document.getElementById('result-thumbnail').src = data.thumbnail;
-            document.getElementById('result-title').textContent = data.title;
-            document.getElementById('result-author').textContent = `By ${data.author}`;
-            document.getElementById('result-meta').textContent = `Duration: ${data.duration} • Quality: ${data.quality}`;
-            document.getElementById('result-download-video').href = data.downloadUrl;
-            document.getElementById('result-download-audio').href = data.downloadUrl; // Placeholder for audio link
+            resultDescription.textContent = data.metadata.description || 'Tidak ada deskripsi.';
+            resultStats.innerHTML = `
+                <span><i class="fas fa-heart mr-1"></i> ${data.metadata.stats.likeCount}</span>
+                <span><i class="fas fa-play mr-1"></i> ${data.metadata.stats.playCount}</span>
+                <span><i class="fas fa-comment mr-1"></i> ${data.metadata.stats.commentCount}</span>
+                <span><i class="fas fa-share mr-1"></i> ${data.metadata.stats.shareCount}</span>
+            `;
             
+            resultDownloads.innerHTML = ''; // Clear previous results
+            
+            if (data.download.video && data.download.video.length > 0) {
+                 data.download.video.forEach((url, index) => {
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = url;
+                    downloadLink.target = '_blank';
+                    downloadLink.className = "w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 text-white";
+                    downloadLink.style.backgroundColor = 'var(--theme-primary)';
+                    downloadLink.innerHTML = `<i class="fas fa-video w-4 h-4 mr-2"></i> Unduh Video (Versi ${index + 1})`;
+                    resultDownloads.appendChild(downloadLink);
+                });
+            }
+            if (data.download.audio) {
+                const audioLink = document.createElement('a');
+                audioLink.href = data.download.audio;
+                audioLink.target = '_blank';
+                audioLink.className = "w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 border border-input bg-background hover:bg-accent";
+                audioLink.innerHTML = `<i class="fas fa-music w-4 h-4 mr-2"></i> Unduh Audio Saja (MP3)`;
+                resultDownloads.appendChild(audioLink);
+            }
+
             resultCard.classList.remove('hidden');
             resetBtn.classList.remove('hidden');
         }
@@ -235,57 +261,82 @@
 
         async function handleDownload() {
             const url = urlInput.value.trim();
-            handleReset(); // Reset previous state
+            handleReset();
 
             if (!url) {
-                showError('Please enter a TikTok URL');
+                showError('Silakan masukkan URL TikTok.');
                 return;
             }
-            if (!url.includes('tiktok.com')) {
-                showError('Please enter a valid TikTok URL');
+            if (!url.includes('tiktok.com') && !url.includes('vt.tiktok.com')) {
+                showError('Silakan masukkan URL TikTok yang valid.');
                 return;
             }
 
             setButtonState(true);
+            const apiUrl = `https://api.siputzx.my.id/api/tiktok/v2?url=${encodeURIComponent(url)}`;
 
-            // Simulate API call
-            setTimeout(() => {
-                try {
-                    const mockData = {
-                        title: 'Sample TikTok Video',
-                        author: '@username',
-                        thumbnail: 'https://placehold.co/300x400/000000/FFFFFF?text=TikTok',
-                        downloadUrl: '#',
-                        duration: '0:30',
-                        quality: 'HD'
-                    };
-                    renderResult(mockData);
-                } catch (err) {
-                    showError('Failed to process TikTok URL. Please try again.');
-                } finally {
-                    setButtonState(false);
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error(`Gagal menghubungi server: ${response.statusText}`);
                 }
-            }, 2000);
+                const result = await response.json();
+                if (result.success && result.data) {
+                    renderResult(result.data);
+                } else {
+                    throw new Error(result.message || 'Gagal memproses URL TikTok.');
+                }
+            } catch (err) {
+                console.error("API call failed:", err);
+                showError(err.message || 'Terjadi kesalahan. Silakan coba lagi.');
+            } finally {
+                setButtonState(false);
+            }
         }
 
-        // --- INITIALIZATION ---
+        // --- MAIN INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const data = await window.firebaseMINNRAI.getWebData();
-                if (!data) throw new Error("No data received from Firebase.");
+                if (!data) throw new Error("Tidak dapat mengambil data dari server.");
+
+                const loadingHeart = document.getElementById('loading-heart-svg');
+                if (data.websetting && data.websetting.color) {
+                    loadingHeart.style.color = '#' + data.websetting.color;
+                }
+
+                if (data.webmaintenance && data.webmaintenance.maintenance === 'true') {
+                    document.getElementById('status-title').textContent = 'Dalam Perbaikan';
+                    document.getElementById('status-char').src = data.webmaintenance.karakteranime;
+                    document.getElementById('status-text').textContent = data.webmaintenance.teksmaintenance;
+                    loadingSpinner.style.display = 'none';
+                    maintenancePage.classList.remove('hidden');
+                    return;
+                }
+                
+                if (data.tiktok && data.tiktok.aktif !== 'true') {
+                    document.getElementById('status-title').textContent = 'Fitur Dinonaktifkan';
+                    document.getElementById('status-char').src = data.webmaintenance.karakteranime;
+                    document.getElementById('status-text').textContent = data.tiktok.pesan || 'Maaf, fitur ini sedang tidak tersedia untuk saat ini.';
+                    loadingSpinner.style.display = 'none';
+                    maintenancePage.classList.remove('hidden');
+                    return;
+                }
+
+                window.firebaseMINNRAI.tambahVisitor('tiktok').catch(console.error);
 
                 renderStaticContent(data);
-                setButtonState(false); // Initial button state
+                setButtonState(false);
 
-                // Attach Event Listeners
                 downloadBtn.addEventListener('click', handleDownload);
                 resetBtn.addEventListener('click', handleReset);
 
                 loadingSpinner.style.display = 'none';
-                mainContent.style.display = 'block';
+                mainContent.classList.remove('hidden');
 
             } catch (err) {
                 console.error("Initialization failed:", err);
+                loadingSpinner.style.display = 'none';
                 pageErrorMessage.textContent = err.message;
                 errorContainer.classList.remove('hidden');
             }

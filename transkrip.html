@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Transcript Generator</title>
+    <title>Memuat...</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,20 +18,30 @@
 
     <style>
         :root {
-            --theme-primary: #3b82f6; /* Default blue */
-            --theme-secondary: #ec4899; /* Default pink */
+            --theme-primary: #FFA6B8;
+            --theme-secondary: #FDE5F2;
+        }
+        html, body {
+            height: 100%;
         }
         body {
             font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
         }
-        /* Simple CSS Animations */
+        #main-content {
+            flex: 1;
+        }
+        /* Animations */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes pulse-icon { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
         .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
         .animate-slideInUp { animation: slideInUp 0.5s ease-out forwards; }
         .animate-spin-custom { animation: rotate 1s linear infinite; }
+        .animate-pulse-icon { animation: pulse-icon 1.5s infinite ease-in-out; }
         
         /* Toast Notification */
         #toast-notification {
@@ -48,73 +58,80 @@
 <body class="bg-gray-50">
 
     <!-- Loading Spinner -->
-    <div id="loading-spinner" class="min-h-screen flex items-center justify-center">
-        <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>
-    </div>
-
-    <!-- Error Message on Page Load -->
-    <div id="error-container" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 hidden">
-        <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md mx-4 text-center">
-            <h2 class="text-xl font-semibold mb-2">Error Loading Page</h2>
-            <p id="error-message" class="text-gray-600">Could not fetch data.</p>
+    <div id="loading-spinner" class="min-h-screen flex items-center justify-center bg-white">
+        <div class="animate-pulse-icon">
+            <svg id="loading-heart-svg" class="w-20 h-20 text-pink-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
         </div>
     </div>
 
-    <!-- Main Content (initially hidden) -->
-    <div id="main-content" class="hidden">
-        <div class="min-h-screen bg-gradient-to-br from-theme-secondary via-white to-theme-primary">
+    <!-- Maintenance / Disabled Page -->
+    <div id="status-page" class="hidden min-h-screen w-full flex items-center justify-center bg-gray-100 p-4">
+        <div class="text-center">
+            <img id="status-char" src="" alt="Karakter" class="w-48 h-48 mx-auto mb-6">
+            <h1 id="status-title" class="text-3xl font-bold text-gray-800 mb-2"></h1>
+            <p id="status-text" class="text-gray-600 max-w-md mx-auto"></p>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-container" class="hidden min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 p-4">
+        <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md mx-4 text-center">
+            <h2 class="text-xl font-semibold mb-2">Gagal Memuat Halaman</h2>
+            <p id="error-message" class="text-gray-600">Tidak dapat mengambil data.</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="hidden flex flex-col h-full">
+        <div class="flex-grow flex flex-col min-h-screen bg-gradient-to-br from-[var(--theme-secondary)] via-white to-[var(--theme-primary)]">
             <!-- Navigation -->
-            <nav class="sticky top-0 bg-white/70 backdrop-blur-lg z-40 shadow-sm">
+            <nav class="sticky top-0 bg-white/80 backdrop-blur-lg z-40 shadow-sm">
                 <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-                    <h1 id="nav-title" class="text-xl font-bold text-gray-800">WebApp</h1>
-                    <a href="#" class="bg-gray-800 text-white px-4 py-2 rounded-full text-sm hover:bg-gray-900 transition">Get Started</a>
+                    <div class="flex items-center space-x-3">
+                        <img id="nav-icon" src="" alt="Icon" class="w-8 h-8 rounded-full">
+                        <h1 id="nav-title" class="text-xl font-bold text-gray-800"></h1>
+                    </div>
                 </div>
             </nav>
 
-            <main class="container mx-auto px-4 py-8">
+            <main class="container mx-auto px-4 py-8 flex-grow">
                 <!-- Header -->
-                <div class="flex items-center justify-between mb-8 animate-slideInUp">
+                <div class="flex flex-col sm:flex-row items-center justify-between mb-8 animate-slideInUp gap-4">
                     <div class="flex items-center space-x-4">
-                        <a href="index.html" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent">
+                        <a href="index.html" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent">
                             <i class="fas fa-arrow-left w-4 h-4 mr-2"></i>
-                            Back to Home
+                            Kembali
                         </a>
                         <div class="flex items-center space-x-2">
-                            <i class="fas fa-file-alt w-8 h-8 text-blue-500"></i>
-                            <h1 class="text-3xl font-poppins font-bold text-gray-800">Video Transcript</h1>
+                            <i class="fas fa-file-alt text-2xl sm:text-3xl text-blue-500"></i>
+                            <h1 class="text-2xl sm:text-3xl font-poppins font-bold text-gray-800">Transkrip Video</h1>
                         </div>
                     </div>
                     <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold space-x-1">
                         <i class="fas fa-eye w-4 h-4"></i>
-                        <span id="visitor-count">0 visitors</span>
+                        <span id="visitor-count">0 pengunjung</span>
                     </div>
                 </div>
 
                 <div class="max-w-4xl mx-auto">
                     <!-- Generator Form -->
                     <div class="animate-fadeIn mb-6" style="animation-delay: 0.2s;">
-                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                        <div class="rounded-lg border bg-white/80 backdrop-blur-sm shadow-lg">
                             <div class="p-6 flex items-center space-x-2">
                                 <i class="fas fa-file-alt w-5 h-5"></i>
-                                <h3 class="text-lg font-semibold">Generate Video Transcript</h3>
+                                <h3 class="text-lg font-semibold">Buat Transkrip Video</h3>
                             </div>
                             <div class="p-6 pt-0 space-y-4">
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div class="md:col-span-2">
-                                        <label class="block text-sm font-medium mb-2">YouTube URL</label>
-                                        <input id="url-input" type="url" placeholder="https://www.youtube.com/watch?v=..." class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium mb-2">Language</label>
-                                        <select id="language-select" class="h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"></select>
-                                    </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">URL YouTube</label>
+                                    <input id="url-input" type="url" placeholder="https://www.youtube.com/watch?v=..." class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
                                 </div>
                                 <div id="form-error" class="hidden items-center rounded-lg border border-red-300 bg-red-50 text-red-700 p-3 text-sm">
                                     <i class="fas fa-exclamation-circle h-4 w-4 mr-2"></i>
                                     <span id="form-error-msg"></span>
                                 </div>
                                 <div class="flex space-x-2">
-                                    <button id="generate-btn" class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 bg-[var(--theme-primary)] text-white hover:bg-[var(--theme-primary)]/90 disabled:opacity-50"></button>
+                                    <button id="generate-btn" class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 text-white disabled:opacity-50" style="background-color: var(--theme-primary);"></button>
                                     <button id="reset-btn" class="hidden inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 border border-input bg-background hover:bg-accent">Reset</button>
                                 </div>
                             </div>
@@ -123,66 +140,55 @@
 
                     <!-- Transcript Result -->
                     <div id="result-card" class="hidden animate-fadeIn">
-                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
-                            <div class="p-6 flex items-center justify-between">
-                                <h3 class="text-lg font-semibold">Generated Transcript</h3>
+                        <div class="rounded-lg border bg-white/80 backdrop-blur-sm shadow-lg">
+                            <div class="p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <h3 id="transcript-title" class="text-lg font-semibold"></h3>
                                 <div class="flex space-x-2">
                                     <button id="copy-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent">
-                                        <i class="fas fa-copy w-4 h-4 mr-2"></i>Copy
+                                        <i class="fas fa-copy w-4 h-4 mr-2"></i>Salin
                                     </button>
                                     <button id="download-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent">
-                                        <i class="fas fa-download w-4 h-4 mr-2"></i>Download
+                                        <i class="fas fa-download w-4 h-4 mr-2"></i>Unduh
                                     </button>
                                 </div>
                             </div>
                             <div class="p-6 pt-0">
-                                <textarea id="transcript-output" class="min-h-[400px] w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-sm" placeholder="Transcript will appear here..."></textarea>
+                                <textarea id="transcript-output" readonly class="min-h-[300px] w-full rounded-md border border-input bg-gray-50 p-3 text-sm" placeholder="Transkrip akan muncul di sini..."></textarea>
                                 <div class="mt-4 flex items-center justify-between text-sm text-gray-500">
                                     <span id="transcript-stats"></span>
-                                    <span id="transcript-language"></span>
+                                    <span id="transcript-author"></span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Other sections... -->
-
                 </div>
             </main>
 
             <!-- Footer -->
             <footer class="bg-gray-800 text-white py-6 mt-12">
-                <div class="container mx-auto text-center">
-                    <p>&copy; 2024 <span id="footer-title">WebApp</span>. All Rights Reserved.</p>
+                <div class="container mx-auto text-center px-4">
+                    <p id="footer-text"></p>
                 </div>
             </footer>
         </div>
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast-notification" class="fixed bottom-5 right-5 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg">
+    <div id="toast-notification" class="fixed bottom-5 right-5 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg z-50">
         <span id="toast-message"></span>
     </div>
 
     <script type="module">
         import './firebase-init.js';
 
-        // --- STATE & CONFIG ---
+        // --- STATE & DOM ELEMENTS ---
         let isLoading = false;
-        const LANGUAGE_OPTIONS = [
-            { value: 'auto', label: 'Auto Detect' }, { value: 'en', label: 'English' }, { value: 'es', label: 'Spanish' },
-            { value: 'fr', label: 'French' }, { value: 'de', label: 'German' }, { value: 'it', label: 'Italian' },
-            { value: 'pt', label: 'Portuguese' }, { value: 'ru', label: 'Russian' }, { value: 'ja', label: 'Japanese' },
-            { value: 'ko', label: 'Korean' }, { value: 'zh', label: 'Chinese' }, { value: 'id', label: 'Indonesian' }
-        ];
-
-        // --- DOM ELEMENTS ---
         const loadingSpinner = document.getElementById('loading-spinner');
         const errorContainer = document.getElementById('error-container');
         const pageErrorMessage = document.getElementById('error-message');
         const mainContent = document.getElementById('main-content');
+        const maintenancePage = document.getElementById('status-page');
         const urlInput = document.getElementById('url-input');
-        const languageSelect = document.getElementById('language-select');
         const generateBtn = document.getElementById('generate-btn');
         const resetBtn = document.getElementById('reset-btn');
         const formError = document.getElementById('form-error');
@@ -195,33 +201,34 @@
         const toastMsg = document.getElementById('toast-message');
 
         // --- UI UPDATE FUNCTIONS ---
-        function updateTheme(root, color, gradation) {
-            if (color) root.style.setProperty('--theme-primary', color);
-            if (gradation) root.style.setProperty('--theme-secondary', gradation);
+        function updateTheme(websetting) {
+            if (!websetting) return;
+            const primaryColor = '#' + websetting.color;
+            const secondaryColor = '#' + websetting.gradation;
+            document.documentElement.style.setProperty('--theme-primary', primaryColor);
+            document.documentElement.style.setProperty('--theme-secondary', secondaryColor);
         }
 
         function renderStaticContent(data) {
             const websetting = data.websetting;
             if (websetting) {
-                updateTheme(document.documentElement, websetting.color, websetting.gradation);
-                document.title = `${websetting.name} - Video Transcript`;
-                document.getElementById('nav-title').textContent = websetting.name;
-                document.getElementById('footer-title').textContent = websetting.name;
+                updateTheme(websetting);
+                const webName = websetting.name || 'WebApp';
+                document.title = `${webName} - Transkrip Video`;
+                document.getElementById('nav-icon').src = websetting.icon;
+                document.getElementById('nav-title').textContent = webName;
+                document.getElementById('footer-text').textContent = websetting.watermark || `© 2025 ${webName}`;
             }
-            document.getElementById('visitor-count').textContent = `${(data.transkrip?.visitor || 0).toLocaleString()} visitors`;
-        }
-        
-        function populateLanguageOptions() {
-            LANGUAGE_OPTIONS.forEach(opt => languageSelect.add(new Option(opt.label, opt.value)));
+            document.getElementById('visitor-count').textContent = `${(data.transkrip?.visitor || 0).toLocaleString()} pengunjung`;
         }
 
         function setButtonState(loading) {
             isLoading = loading;
             generateBtn.disabled = loading;
             if (loading) {
-                generateBtn.innerHTML = `<div class="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin-custom"></div> Generating Transcript...`;
+                generateBtn.innerHTML = `<div class="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin-custom"></div> Membuat Transkrip...`;
             } else {
-                generateBtn.innerHTML = `<i class="fas fa-file-alt w-4 h-4 mr-2"></i> Generate Transcript`;
+                generateBtn.innerHTML = `<i class="fas fa-file-alt w-4 h-4 mr-2"></i> Buat Transkrip`;
             }
         }
 
@@ -236,14 +243,13 @@
             formError.classList.add('hidden');
         }
 
-        function renderResult(transcript) {
-            transcriptOutput.value = transcript;
-            const lineCount = transcript.split('\n').length;
-            const charCount = transcript.length;
-            document.getElementById('transcript-stats').textContent = `${lineCount} lines • ${charCount} characters`;
+        function renderResult(data) {
+            const fullTranscript = data.subtitles.map(line => line.f).join(' ');
+            transcriptOutput.value = fullTranscript;
             
-            const selectedLang = LANGUAGE_OPTIONS.find(l => l.value === languageSelect.value);
-            document.getElementById('transcript-language').textContent = `Language: ${selectedLang?.label}`;
+            document.getElementById('transcript-title').textContent = data.title || 'Transkrip Dibuat';
+            document.getElementById('transcript-author').textContent = `Oleh: ${data.author || 'Tidak diketahui'}`;
+            document.getElementById('transcript-stats').textContent = `${fullTranscript.split(' ').length} kata • ${fullTranscript.length} karakter`;
 
             resultCard.classList.remove('hidden');
             resetBtn.classList.remove('hidden');
@@ -252,9 +258,7 @@
         function showToast(message) {
             toastMsg.textContent = message;
             toastEl.classList.add('show');
-            setTimeout(() => {
-                toastEl.classList.remove('show');
-            }, 3000);
+            setTimeout(() => toastEl.classList.remove('show'), 3000);
         }
 
         // --- EVENT HANDLERS ---
@@ -272,53 +276,43 @@
             handleReset();
 
             if (!url) {
-                showError('Please enter a video URL');
+                showError('Silakan masukkan URL YouTube.');
                 return;
             }
             if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
-                showError('Please enter a valid YouTube URL');
+                showError('Silakan masukkan URL YouTube yang valid.');
                 return;
             }
 
             setButtonState(true);
+            const apiUrl = `https://minnrai.vercel.app/api/transkrip?get_video=${encodeURIComponent(url)}`;
 
-            // Simulate API call
-            setTimeout(() => {
-                try {
-                    const mockTranscript = `[00:00] Welcome to this amazing video tutorial
-[00:15] Today we're going to learn about artificial intelligence
-[00:30] AI has been revolutionizing many industries
-[00:45] From healthcare to transportation, AI is everywhere
-[01:00] Let's start with the basics of machine learning
-[01:15] Machine learning is a subset of artificial intelligence
-[01:30] It enables computers to learn without explicit programming
-[01:45] There are three main types of machine learning
-[02:00] Supervised learning uses labeled data
-[02:15] Unsupervised learning finds patterns in unlabeled data
-[02:30] Reinforcement learning uses rewards and penalties
-[02:45] Now let's look at some practical applications
-[03:00] Image recognition is one of the most popular uses
-[03:15] Natural language processing helps computers understand text
-[03:30] Recommendation systems suggest products or content
-[03:45] Autonomous vehicles use AI for navigation
-[04:00] That concludes our introduction to AI fundamentals
-[04:15] Thank you for watching, and see you next time!`;
-                    renderResult(mockTranscript);
-                } catch (err) {
-                    showError('Failed to generate transcript. Please try again.');
-                } finally {
-                    setButtonState(false);
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error(`Gagal menghubungi server: ${response.statusText}`);
                 }
-            }, 3000);
+                const result = await response.json();
+                if (result.status === 'ok' && result.subtitles) {
+                    renderResult(result);
+                } else {
+                    throw new Error(result.message || 'Gagal membuat transkrip. Pastikan video memiliki subtitle.');
+                }
+            } catch (err) {
+                console.error("API call failed:", err);
+                showError(err.message || 'Terjadi kesalahan. Silakan coba lagi.');
+            } finally {
+                setButtonState(false);
+            }
         }
 
         function handleCopy() {
             const text = transcriptOutput.value;
             if (!text) return;
             navigator.clipboard.writeText(text).then(() => {
-                showToast('Transcript copied to clipboard!');
+                showToast('Transkrip berhasil disalin!');
             }).catch(err => {
-                showToast('Failed to copy transcript.');
+                showToast('Gagal menyalin transkrip.');
                 console.error('Copy failed', err);
             });
         }
@@ -326,36 +320,62 @@
         function handleDownload() {
             const text = transcriptOutput.value;
             if (!text) return;
+            const title = document.getElementById('transcript-title').textContent || 'transcript';
+            const filename = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
             const element = document.createElement('a');
-            const file = new Blob([text], { type: 'text/plain' });
+            const file = new Blob([text], { type: 'text/plain;charset=utf-8' });
             element.href = URL.createObjectURL(file);
-            element.download = 'transcript.txt';
+            element.download = filename;
             document.body.appendChild(element);
             element.click();
             document.body.removeChild(element);
         }
 
-        // --- INITIALIZATION ---
+        // --- MAIN INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const data = await window.firebaseMINNRAI.getWebData();
-                if (!data) throw new Error("No data received from Firebase.");
+                if (!data) throw new Error("Tidak dapat mengambil data dari server.");
+
+                const loadingHeart = document.getElementById('loading-heart-svg');
+                if (data.websetting && data.websetting.color) {
+                    loadingHeart.style.color = '#' + data.websetting.color;
+                }
+
+                if (data.webmaintenance && data.webmaintenance.maintenance === 'true') {
+                    document.getElementById('status-title').textContent = 'Dalam Perbaikan';
+                    document.getElementById('status-char').src = data.webmaintenance.karakteranime;
+                    document.getElementById('status-text').textContent = data.webmaintenance.teksmaintenance;
+                    loadingSpinner.style.display = 'none';
+                    maintenancePage.classList.remove('hidden');
+                    return;
+                }
+                
+                if (data.transkrip && data.transkrip.aktif !== 'true') {
+                    document.getElementById('status-title').textContent = 'Fitur Dinonaktifkan';
+                    document.getElementById('status-char').src = data.webmaintenance.karakteranime;
+                    document.getElementById('status-text').textContent = data.transkrip.pesan || 'Maaf, fitur ini sedang tidak tersedia untuk saat ini.';
+                    loadingSpinner.style.display = 'none';
+                    maintenancePage.classList.remove('hidden');
+                    return;
+                }
+
+                window.firebaseMINNRAI.tambahVisitor('transkrip').catch(console.error);
 
                 renderStaticContent(data);
-                populateLanguageOptions();
                 setButtonState(false);
 
-                // Attach Event Listeners
                 generateBtn.addEventListener('click', handleGenerate);
                 resetBtn.addEventListener('click', handleReset);
                 copyBtn.addEventListener('click', handleCopy);
                 downloadBtn.addEventListener('click', handleDownload);
 
                 loadingSpinner.style.display = 'none';
-                mainContent.style.display = 'block';
+                mainContent.classList.remove('hidden');
 
             } catch (err) {
                 console.error("Initialization failed:", err);
+                loadingSpinner.style.display = 'none';
                 pageErrorMessage.textContent = err.message;
                 errorContainer.classList.remove('hidden');
             }
@@ -363,4 +383,3 @@
     </script>
 </body>
 </html>
-

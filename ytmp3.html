@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube to MP3 Converter</title>
+    <title>Memuat...</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,143 +18,147 @@
 
     <style>
         :root {
-            --theme-primary: #3b82f6; /* Default blue */
-            --theme-secondary: #ec4899; /* Default pink */
+            --theme-primary: #FFA6B8;
+            --theme-secondary: #FDE5F2;
+        }
+        html, body {
+            height: 100%;
         }
         body {
             font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
         }
-        /* Simple CSS Animations */
+        #main-content {
+            flex: 1;
+        }
+        /* Animations */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes pulse-icon { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
         .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
         .animate-slideInUp { animation: slideInUp 0.5s ease-out forwards; }
         .animate-spin-custom { animation: rotate 1s linear infinite; }
+        .animate-pulse-icon { animation: pulse-icon 1.5s infinite ease-in-out; }
     </style>
 </head>
 <body class="bg-gray-50">
 
     <!-- Loading Spinner -->
-    <div id="loading-spinner" class="min-h-screen flex items-center justify-center">
-        <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>
-    </div>
-
-    <!-- Error Message on Page Load -->
-    <div id="error-container" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 hidden">
-        <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md mx-4 text-center">
-            <h2 class="text-xl font-semibold mb-2">Error Loading Page</h2>
-            <p id="error-message" class="text-gray-600">Could not fetch data.</p>
+    <div id="loading-spinner" class="min-h-screen flex items-center justify-center bg-white">
+        <div class="animate-pulse-icon">
+            <svg id="loading-heart-svg" class="w-20 h-20 text-pink-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
         </div>
     </div>
 
-    <!-- Main Content (initially hidden) -->
-    <div id="main-content" class="hidden">
-        <div class="min-h-screen bg-gradient-to-br from-theme-secondary via-white to-theme-primary">
+    <!-- Maintenance / Disabled Page -->
+    <div id="status-page" class="hidden min-h-screen w-full flex items-center justify-center bg-gray-100 p-4">
+        <div class="text-center">
+            <img id="status-char" src="" alt="Karakter" class="w-48 h-48 mx-auto mb-6">
+            <h1 id="status-title" class="text-3xl font-bold text-gray-800 mb-2"></h1>
+            <p id="status-text" class="text-gray-600 max-w-md mx-auto"></p>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-container" class="hidden min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 p-4">
+        <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md mx-4 text-center">
+            <h2 class="text-xl font-semibold mb-2">Gagal Memuat Halaman</h2>
+            <p id="error-message" class="text-gray-600">Tidak dapat mengambil data.</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="hidden flex flex-col h-full">
+        <div class="flex-grow flex flex-col min-h-screen bg-gradient-to-br from-[var(--theme-secondary)] via-white to-[var(--theme-primary)]">
             <!-- Navigation -->
-            <nav class="sticky top-0 bg-white/70 backdrop-blur-lg z-40 shadow-sm">
+            <nav class="sticky top-0 bg-white/80 backdrop-blur-lg z-40 shadow-sm">
                 <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-                    <h1 id="nav-title" class="text-xl font-bold text-gray-800">WebApp</h1>
-                    <a href="#" class="bg-gray-800 text-white px-4 py-2 rounded-full text-sm hover:bg-gray-900 transition">Get Started</a>
+                    <div class="flex items-center space-x-3">
+                        <img id="nav-icon" src="" alt="Icon" class="w-8 h-8 rounded-full">
+                        <h1 id="nav-title" class="text-xl font-bold text-gray-800"></h1>
+                    </div>
                 </div>
             </nav>
 
-            <main class="container mx-auto px-4 py-8">
+            <main class="container mx-auto px-4 py-8 flex-grow">
                 <!-- Header -->
-                <div class="flex items-center justify-between mb-8 animate-slideInUp">
+                <div class="flex flex-col sm:flex-row items-center justify-between mb-8 animate-slideInUp gap-4">
                     <div class="flex items-center space-x-4">
-                        <a href="index.html" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent">
+                        <a href="index.html" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent">
                             <i class="fas fa-arrow-left w-4 h-4 mr-2"></i>
-                            Back to Home
+                            Kembali
                         </a>
                         <div class="flex items-center space-x-2">
-                            <i class="fab fa-youtube text-2xl text-red-500"></i>
-                            <h1 class="text-3xl font-poppins font-bold text-gray-800">YouTube to MP3</h1>
+                            <i class="fab fa-youtube text-2xl sm:text-3xl text-red-500"></i>
+                            <h1 class="text-2xl sm:text-3xl font-poppins font-bold text-gray-800">YouTube ke MP3</h1>
                         </div>
                     </div>
                     <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold space-x-1">
                         <i class="fas fa-eye w-4 h-4"></i>
-                        <span id="visitor-count">0 visitors</span>
+                        <span id="visitor-count">0 pengunjung</span>
                     </div>
                 </div>
 
                 <div class="max-w-2xl mx-auto">
-                    <!-- Download Form -->
-                    <div class="animate-fadeIn mb-6" style="animation-delay: 0.2s;">
-                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                    <!-- Step 1: URL Input -->
+                    <div id="url-stage" class="animate-fadeIn" style="animation-delay: 0.2s;">
+                        <div class="rounded-lg border bg-white/80 backdrop-blur-sm shadow-lg">
                             <div class="p-6 flex items-center space-x-2">
-                                <i class="fas fa-music w-5 h-5"></i>
-                                <h3 class="text-lg font-semibold">Convert YouTube to MP3</h3>
+                                <i class="fas fa-link w-5 h-5"></i>
+                                <h3 class="text-lg font-semibold">Konversi Video YouTube ke MP3</h3>
                             </div>
                             <div class="p-6 pt-0 space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium mb-2">YouTube URL</label>
+                                    <label class="block text-sm font-medium mb-2">URL YouTube</label>
                                     <input id="url-input" type="url" placeholder="https://www.youtube.com/watch?v=..." class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium mb-2">Audio Quality</label>
-                                    <select id="quality-select" class="h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"></select>
                                 </div>
                                 <div id="form-error" class="hidden items-center rounded-lg border border-red-300 bg-red-50 text-red-700 p-3 text-sm">
                                     <i class="fas fa-exclamation-circle h-4 w-4 mr-2"></i>
                                     <span id="form-error-msg"></span>
                                 </div>
                                 <div class="flex space-x-2">
-                                    <button id="download-btn" class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 bg-[var(--theme-primary)] text-white hover:bg-[var(--theme-primary)]/90 disabled:opacity-50"></button>
-                                    <button id="reset-btn" class="hidden inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 border border-input bg-background hover:bg-accent">Reset</button>
+                                    <button id="get-info-btn" class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 text-white disabled:opacity-50" style="background-color: var(--theme-primary);"></button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Download Result -->
+                    <!-- Step 2 & 3: Conversion & Download -->
                     <div id="result-card" class="hidden animate-fadeIn">
-                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
-                            <div class="p-6"><h3 class="text-lg font-semibold">Download Ready</h3></div>
-                            <div class="p-6 pt-0">
-                                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <div class="rounded-lg border bg-white/80 backdrop-blur-sm shadow-lg">
+                            <div class="p-6"><h3 class="text-lg font-semibold">Detail Video</h3></div>
+                            <div class="p-6 pt-0 space-y-4">
+                               <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
                                     <img id="result-thumbnail" src="" alt="Video thumbnail" class="w-32 h-20 object-cover rounded-lg mx-auto sm:mx-0">
                                     <div class="flex-1">
-                                        <h3 id="result-title" class="font-semibold text-lg mb-2"></h3>
-                                        <p id="result-channel" class="text-gray-600 mb-1"></p>
-                                        <p id="result-meta" class="text-sm text-gray-500 mb-4"></p>
-                                        <a id="result-download-btn" href="#" class="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 bg-[var(--theme-primary)] text-white hover:bg-[var(--theme-primary)]/90">
-                                            <!-- Download button content changes dynamically -->
-                                        </a>
+                                        <h3 id="result-title" class="font-semibold text-lg mb-1 line-clamp-2"></h3>
+                                        <p id="result-channel" class="text-sm text-gray-600 mb-2"></p>
+                                        <p id="result-duration" class="text-xs text-gray-500"></p>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Features & Instructions -->
-                    <div class="space-y-6 mt-8 animate-fadeIn" style="animation-delay: 0.4s;">
-                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
-                            <div class="p-6"><h3 class="text-lg font-semibold">Why Choose Our Converter?</h3></div>
-                            <div class="p-6 pt-0 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <ul class="space-y-2 text-sm">
-                                    <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> High-quality audio</li>
-                                    <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Multiple quality options</li>
-                                    <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Fast conversion speed</li>
-                                </ul>
-                                <ul class="space-y-2 text-sm">
-                                    <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> No registration required</li>
-                                    <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Free and unlimited</li>
-                                    <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Safe and secure</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
-                            <div class="p-6"><h3 class="text-lg font-semibold">How to Convert YouTube to MP3</h3></div>
-                            <div class="p-6 pt-0">
-                                <ol class="list-decimal list-inside space-y-2 text-gray-600">
-                                    <li>Copy the YouTube video URL from your browser or app</li>
-                                    <li>Paste the URL in the input field above</li>
-                                    <li>Select your preferred audio quality</li>
-                                    <li>Click "Convert to MP3" and wait for processing</li>
-                                    <li>Download your MP3 file when the download button appears</li>
-                                </ol>
+                                <hr/>
+                                <div id="conversion-stage" class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Pilih Kualitas Audio</label>
+                                        <select id="quality-select" class="h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"></select>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button id="convert-btn" class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 text-white disabled:opacity-50" style="background-color: var(--theme-primary);"></button>
+                                        <button id="reset-btn" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 border border-input bg-background hover:bg-accent">Batal</button>
+                                    </div>
+                                </div>
+                                <div id="progress-stage" class="hidden text-center space-y-2">
+                                    <div class="w-8 h-8 border-4 border-dashed rounded-full animate-spin-custom mx-auto" style="border-color: var(--theme-primary); border-top-color: transparent;"></div>
+                                    <p id="progress-text" class="text-sm text-gray-600">Memulai proses konversi...</p>
+                                </div>
+                                <div id="download-stage" class="hidden">
+                                     <a id="final-download-btn" href="#" target="_blank" class="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 text-white" style="background-color: var(--theme-primary);">
+                                        <i class="fas fa-download w-4 h-4 mr-2"></i> Unduh MP3
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -163,8 +167,8 @@
 
             <!-- Footer -->
             <footer class="bg-gray-800 text-white py-6 mt-12">
-                <div class="container mx-auto text-center">
-                    <p>&copy; 2024 <span id="footer-title">WebApp</span>. All Rights Reserved.</p>
+                <div class="container mx-auto text-center px-4">
+                    <p id="footer-text"></p>
                 </div>
             </footer>
         </div>
@@ -175,53 +179,56 @@
 
         // --- STATE & CONFIG ---
         let isLoading = false;
-        const QUALITY_OPTIONS = [
-            { value: '128', label: '128 kbps (Standard)' }, { value: '192', label: '192 kbps (Good)' },
-            { value: '256', label: '256 kbps (High)' }, { value: '320', label: '320 kbps (Premium)' }
-        ];
+        let videoInfo = null;
+        let checkJobInterval = null;
+        const API_BASE_URL = 'https://backand-ytdl.siputzx.my.id';
 
         // --- DOM ELEMENTS ---
         const loadingSpinner = document.getElementById('loading-spinner');
         const errorContainer = document.getElementById('error-container');
         const pageErrorMessage = document.getElementById('error-message');
         const mainContent = document.getElementById('main-content');
+        const maintenancePage = document.getElementById('status-page');
         const urlInput = document.getElementById('url-input');
-        const qualitySelect = document.getElementById('quality-select');
-        const downloadBtn = document.getElementById('download-btn');
+        const getInfoBtn = document.getElementById('get-info-btn');
         const resetBtn = document.getElementById('reset-btn');
         const formError = document.getElementById('form-error');
         const formErrorMsg = document.getElementById('form-error-msg');
         const resultCard = document.getElementById('result-card');
+        const qualitySelect = document.getElementById('quality-select');
+        const convertBtn = document.getElementById('convert-btn');
+        const progressStage = document.getElementById('progress-stage');
+        const progressText = document.getElementById('progress-text');
+        const downloadStage = document.getElementById('download-stage');
 
         // --- UI UPDATE FUNCTIONS ---
-        function updateTheme(root, color, gradation) {
-            if (color) root.style.setProperty('--theme-primary', color);
-            if (gradation) root.style.setProperty('--theme-secondary', gradation);
+        function updateTheme(websetting) {
+            if (!websetting) return;
+            const primaryColor = '#' + websetting.color;
+            const secondaryColor = '#' + websetting.gradation;
+            document.documentElement.style.setProperty('--theme-primary', primaryColor);
+            document.documentElement.style.setProperty('--theme-secondary', secondaryColor);
         }
 
         function renderStaticContent(data) {
             const websetting = data.websetting;
             if (websetting) {
-                updateTheme(document.documentElement, websetting.color, websetting.gradation);
-                document.title = `${websetting.name} - YouTube to MP3`;
-                document.getElementById('nav-title').textContent = websetting.name;
-                document.getElementById('footer-title').textContent = websetting.name;
+                updateTheme(websetting);
+                const webName = websetting.name || 'WebApp';
+                document.title = `${webName} - YouTube ke MP3`;
+                document.getElementById('nav-icon').src = websetting.icon;
+                document.getElementById('nav-title').textContent = webName;
+                document.getElementById('footer-text').textContent = websetting.watermark || `© 2025 ${webName}`;
             }
-            document.getElementById('visitor-count').textContent = `${(data.ytmp3?.visitor || 0).toLocaleString()} visitors`;
+            document.getElementById('visitor-count').textContent = `${(data.ytmp3?.visitor || 0).toLocaleString()} pengunjung`;
         }
         
-        function populateQualityOptions() {
-            QUALITY_OPTIONS.forEach(opt => qualitySelect.add(new Option(opt.label, opt.value)));
-            qualitySelect.value = '320'; // Set default
-        }
-
-        function setButtonState(loading) {
-            isLoading = loading;
-            downloadBtn.disabled = loading;
+        function setButtonState(button, loading, text) {
+            button.disabled = loading;
             if (loading) {
-                downloadBtn.innerHTML = `<div class="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin-custom"></div> Converting...`;
+                button.innerHTML = `<div class="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin-custom"></div> ${text}...`;
             } else {
-                downloadBtn.innerHTML = `<i class="fas fa-download w-4 h-4 mr-2"></i> Convert to MP3`;
+                button.innerHTML = text;
             }
         }
 
@@ -229,25 +236,33 @@
             formErrorMsg.textContent = message;
             formError.classList.remove('hidden');
             formError.classList.add('flex');
-            resetBtn.classList.remove('hidden');
         }
 
         function hideError() {
             formError.classList.add('hidden');
         }
 
-        function renderResult(data) {
+        function renderInfoResult(data) {
+            videoInfo = data; // Store full info
             document.getElementById('result-thumbnail').src = data.thumbnail;
             document.getElementById('result-title').textContent = data.title;
-            document.getElementById('result-channel').textContent = `Channel: ${data.channel}`;
-            document.getElementById('result-meta').textContent = `Duration: ${data.duration} • Quality: ${data.quality}`;
+            document.getElementById('result-channel').textContent = `Oleh: ${data.artist}`;
+            document.getElementById('result-duration').textContent = `Durasi: ${new Date(data.duration * 1000).toISOString().substr(14, 5)}`;
             
-            const downloadLink = document.getElementById('result-download-btn');
-            downloadLink.href = data.downloadUrl;
-            downloadLink.innerHTML = `<i class="fas fa-download w-4 h-4 mr-2"></i> Download MP3 (${data.quality})`;
-            
+            qualitySelect.innerHTML = ''; // Clear previous options
+            data.audio_formats.forEach(format => {
+                if(format.acodec && format.abr > 0) { // Only show valid audio formats
+                    const label = `${Math.round(format.abr)} kbps (${format.acodec})`;
+                    qualitySelect.add(new Option(label, format.format_id));
+                }
+            });
+
+            document.getElementById('url-stage').classList.add('hidden');
             resultCard.classList.remove('hidden');
-            resetBtn.classList.remove('hidden');
+            document.getElementById('conversion-stage').classList.remove('hidden');
+            progressStage.classList.add('hidden');
+            downloadStage.classList.add('hidden');
+            setButtonState(convertBtn, false, '<i class="fas fa-exchange-alt w-4 h-4 mr-2"></i> Konversi ke MP3');
         }
 
         // --- EVENT HANDLERS ---
@@ -255,66 +270,159 @@
             urlInput.value = '';
             hideError();
             resultCard.classList.add('hidden');
-            resetBtn.classList.add('hidden');
-            setButtonState(false);
+            document.getElementById('url-stage').classList.remove('hidden');
+            videoInfo = null;
+            clearInterval(checkJobInterval);
+            setButtonState(getInfoBtn, false, '<i class="fas fa-search w-4 h-4 mr-2"></i> Dapatkan Info');
         }
 
-        async function handleDownload() {
+        async function handleGetInfo() {
             const url = urlInput.value.trim();
-            handleReset();
+            hideError();
 
             if (!url) {
-                showError('Please enter a YouTube URL');
+                showError('Silakan masukkan URL YouTube.');
                 return;
             }
             if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
-                showError('Please enter a valid YouTube URL');
+                showError('Silakan masukkan URL YouTube yang valid.');
                 return;
             }
 
-            setButtonState(true);
+            setButtonState(getInfoBtn, true, 'Mendapatkan Info');
+            
+            const formData = new FormData();
+            formData.append('url', url);
 
-            // Simulate API call
-            setTimeout(() => {
-                try {
-                    const selectedQuality = qualitySelect.value;
-                    const mockData = {
-                        title: 'Amazing Song - Official Music Video',
-                        channel: 'Music Channel',
-                        duration: '3:45',
-                        thumbnail: 'https://placehold.co/320x180/FF0000/FFFFFF?text=YouTube',
-                        quality: `${selectedQuality} kbps`,
-                        downloadUrl: '#'
-                    };
-                    renderResult(mockData);
-                } catch (err) {
-                    showError('Failed to process YouTube URL. Please try again.');
-                } finally {
-                    setButtonState(false);
-                }
-            }, 2000);
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/get-info`, { method: 'POST', body: formData });
+                if (!response.ok) throw new Error(`Gagal mengambil info: ${response.statusText}`);
+                const result = await response.json();
+                renderInfoResult(result);
+            } catch (err) {
+                console.error("Get Info API call failed:", err);
+                showError(err.message || 'Gagal mengambil info video. Coba lagi.');
+                setButtonState(getInfoBtn, false, '<i class="fas fa-search w-4 h-4 mr-2"></i> Dapatkan Info');
+            }
         }
 
-        // --- INITIALIZATION ---
+        async function handleCreateJob() {
+            setButtonState(convertBtn, true, 'Membuat Job');
+            document.getElementById('reset-btn').disabled = true;
+
+            const formData = new FormData();
+            formData.append('id', videoInfo.id);
+            formData.append('audio_format_id', qualitySelect.value);
+            formData.append('format', 'mp3');
+            formData.append('info', JSON.stringify(videoInfo));
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/create_job`, { method: 'POST', body: formData });
+                if (!response.ok) throw new Error(`Gagal membuat job: ${response.statusText}`);
+                const result = await response.json();
+                
+                document.getElementById('conversion-stage').classList.add('hidden');
+                progressStage.classList.remove('hidden');
+                
+                startCheckingJob(result.job_id);
+
+            } catch (err) {
+                console.error("Create Job API call failed:", err);
+                showError(err.message || 'Gagal memulai konversi.');
+                setButtonState(convertBtn, false, '<i class="fas fa-exchange-alt w-4 h-4 mr-2"></i> Konversi ke MP3');
+                document.getElementById('reset-btn').disabled = false;
+            }
+        }
+
+        function startCheckingJob(jobId) {
+            let attempts = 0;
+            const maxAttempts = 40; // 2 minutes timeout (40 * 3 seconds)
+
+            checkJobInterval = setInterval(async () => {
+                if (attempts >= maxAttempts) {
+                    clearInterval(checkJobInterval);
+                    showError("Proses konversi terlalu lama. Silakan coba lagi.");
+                    handleReset();
+                    return;
+                }
+                attempts++;
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/check_job/${jobId}`);
+                    if (!response.ok) { // If server returns error during polling, stop.
+                        clearInterval(checkJobInterval);
+                        showError(`Gagal memeriksa status: ${response.statusText}`);
+                        handleReset();
+                        return;
+                    }
+                    const result = await response.json();
+
+                    if (result.status === 'completed') {
+                        clearInterval(checkJobInterval);
+                        progressStage.classList.add('hidden');
+                        document.getElementById('final-download-btn').href = `${API_BASE_URL}${result.download_url}`;
+                        downloadStage.classList.remove('hidden');
+                        document.getElementById('reset-btn').disabled = false;
+                    } else if (result.status === 'failed') {
+                        clearInterval(checkJobInterval);
+                        showError(result.error_message || 'Proses konversi gagal.');
+                        handleReset();
+                    } else {
+                        progressText.textContent = `Mengonversi... (${Math.round(result.progress)}%)`;
+                    }
+                } catch (err) {
+                    clearInterval(checkJobInterval);
+                    console.error("Check Job API call failed:", err);
+                    showError('Gagal memeriksa status konversi.');
+                    handleReset();
+                }
+            }, 3000);
+        }
+
+        // --- MAIN INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const data = await window.firebaseMINNRAI.getWebData();
-                if (!data) throw new Error("No data received from Firebase.");
+                if (!data) throw new Error("Tidak dapat mengambil data dari server.");
+
+                const loadingHeart = document.getElementById('loading-heart-svg');
+                if (data.websetting && data.websetting.color) {
+                    loadingHeart.style.color = '#' + data.websetting.color;
+                }
+
+                if (data.webmaintenance && data.webmaintenance.maintenance === 'true') {
+                    document.getElementById('status-title').textContent = 'Dalam Perbaikan';
+                    document.getElementById('status-char').src = data.webmaintenance.karakteranime;
+                    document.getElementById('status-text').textContent = data.webmaintenance.teksmaintenance;
+                    loadingSpinner.style.display = 'none';
+                    maintenancePage.classList.remove('hidden');
+                    return;
+                }
+                
+                if (data.ytmp3 && data.ytmp3.aktif !== 'true') {
+                    document.getElementById('status-title').textContent = 'Fitur Dinonaktifkan';
+                    document.getElementById('status-char').src = data.webmaintenance.karakteranime;
+                    document.getElementById('status-text').textContent = data.ytmp3.pesan || 'Maaf, fitur ini sedang tidak tersedia untuk saat ini.';
+                    loadingSpinner.style.display = 'none';
+                    maintenancePage.classList.remove('hidden');
+                    return;
+                }
+
+                window.firebaseMINNRAI.tambahVisitor('ytmp3').catch(console.error);
 
                 renderStaticContent(data);
-                populateQualityOptions();
-                setButtonState(false);
+                setButtonState(getInfoBtn, false, '<i class="fas fa-search w-4 h-4 mr-2"></i> Dapatkan Info');
 
-                // Attach Event Listeners
-                downloadBtn.addEventListener('click', handleDownload);
+                getInfoBtn.addEventListener('click', handleGetInfo);
+                convertBtn.addEventListener('click', handleCreateJob);
                 resetBtn.addEventListener('click', handleReset);
 
                 loadingSpinner.style.display = 'none';
-                mainContent.style.display = 'block';
+                mainContent.classList.remove('hidden');
 
-            } catch (err)
-                {
+            } catch (err) {
                 console.error("Initialization failed:", err);
+                loadingSpinner.style.display = 'none';
                 pageErrorMessage.textContent = err.message;
                 errorContainer.classList.remove('hidden');
             }
@@ -322,4 +430,3 @@
     </script>
 </body>
 </html>
-
